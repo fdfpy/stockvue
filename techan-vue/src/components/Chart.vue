@@ -28,7 +28,12 @@
           <p><font size="6" color="#000000" face="Meiryo">({{Math.round(100*get_meigara[2])/100}})</font></p>       
         </div>
 
-
+        <div class="float_test150">
+           <p><font size="5" color="#000000" face="Meiryo">表示範囲</font></p>         
+     <p> <input type="radio" name="rang" value="0" v-model="rang" checked="checked"> <font size="3"> 全銘柄 </font> <br>
+         <input type="radio" name="rang" value="150" v-model="rang"> <font size="3"> 過去150日 </font> <br>
+    </p>  
+        </div>
 
         <div class="cp_ipradio">
 
@@ -48,8 +53,22 @@
     	        <input type="radio" class="option-input radio" name="cpipr02" id="box3" value="2" v-model="type">
     	        <font size="2">ろうそく足 + 一目均衡表</font>
       	    </label>
+            <label>
+    	        <input type="radio" class="option-input radio" name="cpipr02" id="box4" value="3" v-model="type">
+    	        <font size="2">ろうそく足 + パラボリック</font>
+      	    </label>
+
 
           </div>
+
+
+          </div>
+
+
+
+
+
+
 
         </div>
 
@@ -82,26 +101,30 @@ export default {
       dat_path:"../static/" + "1570" + ".csv",
       today_kabuka:0,
       dif_kabuka:0,
-      epsnum:2000
+      epsnum:2000,
+      rang:0
     }
  
   },
 
-  //typeを監視し、typeの数値が変更になればfunctionの中身を実行する。
+  //type,rangを監視し、typeの数値が変更になればfunctionの中身を実行する。
   watch:{
     type:function(newvalue){
     d3.select("svg").remove()  //すでに描写されたsvgデータを消去している
-    this.executeall(newvalue)  //newvalueにあたるテクニカルチャートを描写する。
+    this.executeall(newvalue,this.rang)  //newvalueにあたるテクニカルチャートを描写する。
     },
-  },
-
-
+    rang:function(newvalue){
+    d3.select("svg").remove()  //すでに描写されたsvgデータを消去している
+    this.executeall(this.type,newvalue)  //newvalueにあたるテクニカルチャートを描写する
+    }
+    },
+  
   //起動時一度のみexecuteallを実行する。
   created:function(){
      d3.select("svg").remove()  //すでに描写されたsvgデータを消去している
     
      this.dat_path="../static/" + this.stock_num + ".csv"
-     this.executeall(0)
+     this.executeall(0,0)
   },
 
 
@@ -142,17 +165,19 @@ export default {
 
     uploading:function() { 
         d3.select("svg").remove()  //すでに描写されたsvgデータを消去している
-        console.log("this.stock_num")
-        console.log(this.stock_num)        
+        //console.log("this.stock_num")
+        //console.log(this.stock_num)        
         //this.meigara_num=this.get_meigara()
         this.dat_path="../static/" + this.stock_num + ".csv"
-        //this.dat_path="../static/" + this.stock_num + ".csv"       
-        this.executeall(this.type)
+        //this.dat_path="../static/" + this.stock_num + ".csv"   
+  
+        this.executeall(this.type,this.rang)
+        
     },
 
-    executeall: function(type) {
-
-
+    executeall: function(type,rang) {
+       console.log("type",type)
+       console.log("rang",rang)
       //###########################################################
       //################# (1)変数の定義をする。######################
       //###########################################################
@@ -338,8 +363,8 @@ export default {
 
         var datlength=data.length; //描写する対象の日数を設定する 
         //var datlength=40; //描写する対象の日数を設定する 
-        console.log("this.epss")
-        console.log(epsnum)
+        //console.log("this.epss")
+        //console.log(epsnum)
         //***********************************************************************************************************
         //(2-1) timeParse 日付、曜日、時間などフォーマット変換   "2017-10-25" ->  Sun Oct 25 2015 00:00:00 GMT+0900 (Japan Standard Time)
         //***********************************************************************************************************
@@ -348,17 +373,16 @@ export default {
         var timeForm=d3.timeFormat("%Y/%m/%d")
 
 
-        //########## (4-1)クラスからオブジェクトを生成する。########//
+        
  
-        var Tech = new TECH0(data.length) 
-        var Draw = new DRAW()
-
 
         var accessor = techan.plot.candlestick().xScale(x).yScale(y).accessor();
           //var accessor = Assign.candlestick.accessor();
         var   indicatorPreRoll = 33;  // Don't show where indicators don't have data
-          //data.sliceは最新の株価から過去にさかのぼっていくつのデータを取得するか
-        data = data.slice(0, datlength).map(function(d) {
+        
+        //data.sliceは最新の株価から過去にさかのぼっていくつのデータを取得するか       
+        var   datofset= rang==0?  0 : datlength-rang;
+        data = data.slice(datofset, datlength).map(function(d) {
             return {
                 date: parseDate(d.DATE),                
                 close: +d.CLOSE,
@@ -369,6 +393,13 @@ export default {
             };
         }).sort(function(a, b) { return d3.ascending(accessor.d(a), accessor.d(b)); });
 
+        //console.log("DATA",data)
+
+
+        //########## (4-1)クラスからオブジェクトを生成する。########//
+ 
+        var Tech = new TECH0(data.length) 
+        var Draw = new DRAW()
 
         let Assign = new ASSIGN(type)
 
@@ -427,6 +458,7 @@ export default {
 
                  draw.candle_put(data,x,y,yVolume,indicatorPreRoll,xAxis,type,tech)   // ろうそく足と出来高を描写する
                  draw.sma_put(data,s_period,m_period,l_period,tech)   //移動平均線を描写する
+
               }else if(this.type==1){
 
                  draw.candle_put(data,x,y,yVolume,indicatorPreRoll,xAxis,type,tech)   // ろうそく足と出来高を描写する
@@ -436,9 +468,10 @@ export default {
 
                  draw.candle_put(data,x,y,yVolume,indicatorPreRoll,xAxis,type,tech)   // ろうそく足と出来高を描写する
                  draw.ichimoku_put(data,tenkan_delay,kijyun_delay,chikou_delay,senkou1,senkou2_p,senkou2_f,tech) //★ 一目均衡表を描写する ★
+              }else if(this.type==3){
+                 draw.candle_put(data,x,y,yVolume,indicatorPreRoll,xAxis,type,tech)   // ろうそく足と出来高を描写する
+                 draw.parabolic_put(data,tech) //パラボリック解析結果を描写する
               }
-
-
 
 
               //*********************************************************************************   
@@ -551,8 +584,10 @@ export default {
               data=tech.dateadd(data,26,data[data.length-1].date)
             }
 
+           //console.log("DATT1",data.slice(indicatorPreRoll))
            x.domain(techan.scale.plot.time(data).domain());  //日付のデータを取得しx軸に割り当てている。
-           y.domain(techan.scale.plot.ohlc(data.slice(indicatorPreRoll)).domain()); //全期間における株価の最小値と最大値を算出し、y軸に割り当てている。       
+           //y.domain(techan.scale.plot.ohlc(data.slice(indicatorPreRoll)).domain()); //全期間における株価の最小値と最大値を算出し、y軸に割り当てている。     
+           y.domain(techan.scale.plot.ohlc(data.slice(0)).domain()); //全期間における株価の最小値と最大値を算出し、y軸に割り当てている。  
            yVolume.domain(techan.scale.plot.volume(data).domain()); //全期間における出来高の最大値を算出し、[0-最大値]をy軸に割り当てている
            svg.select("g.x.axis").call(xAxis); //x軸に日付のデータを加える。
 
@@ -589,7 +624,7 @@ export default {
 
          sma_put = function(data,s_period,m_period,l_period,tech){
 
-
+            
             var smaday_short = tech.sma_close(data, consts.S_PERIOD)   //close値の移動平均短期を計算している。
             var smaday_middle = tech.sma_close(data, consts.M_PERIOD)   //close値の移動平均短期を計算している。
             var smaday_long = tech.sma_close(data, consts.L_PERIOD)   //close値の移動平均短期を計算している。
@@ -684,6 +719,51 @@ export default {
                         .attr("d", line);
 
          }
+
+
+          //(3)パラボリックを描写する
+         
+         parabolic_put = function(data,tech){
+              console.log("444")
+
+            var parab = tech.paraboric(data)
+
+
+            var parab_obj = d3.line()
+                    .x(function(d) { return x(d.date); })
+                    .y(function(d) { return y(d.sar); });
+                    
+            // ohlcSelection.append("path")
+            //             .datum(parab)
+            //             .attr("class", "line bands")
+            //             .attr("d",  parab_obj)
+
+            // ohlcSelection.append("g")
+            //             .selectAll("circle")
+            //             .datum(parab)
+            //             .enter()
+            //             .append("circle")                       
+            //             .attr("d",  parab_obj)
+
+            ohlcSelection.append("g")
+                    .selectAll("circle")
+                    .data(parab)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function(d) { return x(d.date); })
+                    .attr("cy", function(d) { return y(d.sar); })
+                    .attr("fill", "orange")
+                    .attr("r", 1.2);
+
+
+
+
+
+
+         }
+
+
+
 
           //*********************************************************
           // (3-6)  前日との株価変化率の時系列を算出し、描写する関数(@第2,第3,第4,・・・に描写する関数)
@@ -971,8 +1051,8 @@ export default {
             var dats = datsbox0
             //var average = datsbox.average
             //var sigma = datsbox.sigma
-            console.log("dats")
-            console.log(dats)
+            //console.log("dats")
+            //console.log(dats)
             //console.log("barchart_property")
             //console.log(barchart_property)
 

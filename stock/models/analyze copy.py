@@ -8,10 +8,17 @@ from models import dbcontrol
 import math
 import os
 import pandas_datareader.data as web #米国株データの取得ライブラリを読み込む
-#import seaborn as sns
 from scipy.stats import gaussian_kde
 from scipy.integrate import cumtrapz #pdfを全区間で積分するためのライブラリ
 from sklearn import linear_model
+
+
+
+setting.HOME_PATH=setting.HOME_PATH if os.path.exists(setting.HOME_PATH) else setting.HOME_PATH_LOCAL
+setting.GET_STOCK_F=setting.GET_STOCK_F if os.path.exists(setting.GET_STOCK_F) else setting.GET_STOCK_F_LOCAL
+
+
+
 
 class StockGetTop(object):
     def __init__(self, stocknum = None):
@@ -99,27 +106,27 @@ class StockGet(StockGetTop):
                 self.stockgetdayjsm(datetime.date(self.SY, self.SM, self.SD),datetime.date(self.Y, self.M, self.D), self.stocknum)
                 #self.stockgetweekjsm(datetime.date(self.Y-2, self.M, self.D),datetime.date(self.Y, self.M, self.D), self.stocknum)
                 #株価データ差分を取得する(週足)
-                self.stockgetweekjsm(datetime.date(self.SY, self.SM, self.SD)- datetime.timedelta(days=7),datetime.date(self.Y, self.M, self.D), self.stocknum)
+                #self.stockgetweekjsm(datetime.date(self.SY, self.SM, self.SD)- datetime.timedelta(days=7),datetime.date(self.Y, self.M, self.D), self.stocknum)
 
 
 
             #str(self.stocknum)が英文字の場合
             elif  str(self.stocknum).isnumeric()==False:
-                print("self.stocknum")
-                print(self.stocknum)
+
+
 
                 start=datetime.datetime(self.Y-2, self.M, self.D)
                 end=datetime.datetime(self.Y, self.M, self.D)
                 df=web.DataReader(str(self.stocknum),'yahoo',start,end) #バンガード S&P500 VALUE
                 self.update_day=df.tail(1)
-                   #print(df)
-                   #print(self.update_day.index[0].date())  
+                #print(df)
+                #print(self.update_day.index[0].date())  
                 df=df.drop(columns='Adj Close') #列Aを削除する。
                 df.to_csv(setting.HOME_PATH + str(self.stocknum) + ".csv",header=False) #dfを外部のcsvファイルに書き込む 
-                   #df.to_csv(setting.HOME_PATH + str(self.stocknum) +".week.csv",header=True) #ダミーデータ
+                #df.to_csv(setting.HOME_PATH + str(self.stocknum) +".week.csv",header=True) #ダミーデータ
 
-                   ##print("self.update_day")
-                   ##print(type(self.update_day.index[0])) #index(日付)を取り出す
+                ##print("self.update_day")
+                ##print(type(self.update_day.index[0])) #index(日付)を取り出す
 
 
 
@@ -363,18 +370,18 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
         today_tenkansen=ichimoku_today['TENKAN'][0]
         today_kijyunsen=ichimoku_today['KIJYUN'][0]
         today_senkouspan2=ichimoku_today['SENKOU2'][0]
+        self.today_tenkansen=today_tenkansen #本日の転換線計算値を外部に出力する
 
-        #self.today_tenkansen=today_tenkansen #本日の転換線計算値を外部に出力する
-        #print("ichimoku_today")
-        #print(ichimoku_today)
-        #print("todaykabuka")
-        #print(todaykabuka)
-        #print("today_tenkansen")
-        #print(today_tenkansen)
-        #print("today_kijyunsen")
-        #print(today_kijyunsen)
-        #print("today_senkouspan2")
-        #print(today_senkouspan2)
+        # print("ichimoku_today")
+        # print(ichimoku_today)
+        # print("todaykabuka")
+        # print(todaykabuka)
+        # print("today_tenkansen")
+        # print(today_tenkansen)
+        # print("today_kijyunsen")
+        # print(today_kijyunsen)
+        # print("today_senkouspan2")
+        # print(today_senkouspan2)
 
         if today_kijyunsen >= today_tenkansen and todaykabuka < today_kijyunsen  and todaykabuka >= today_senkouspan2 :
             self.meigara_sta=4
@@ -409,8 +416,8 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
 
 
 
-        #print("meigara_sta") 
-        #print(self.meigara_sta)      
+        # print("meigara_sta") 
+        # print(self.meigara_sta)      
  
         #print("ichimoku_today_25after")
         #print(ichimoku_today_25after) 
@@ -510,7 +517,8 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
                      "p05sig":self.stock_p05sig,
                      "n1sig":self.stock_n1sig,
                      "n05sig":self.stock_n05sig,
-                     "meigara_sta":self.meigara_sta
+                     "meigara_sta":self.meigara_sta,
+                     "tenkansen" :self.today_tenkansen
         }
 
                     
@@ -792,4 +800,5 @@ class GETCRITERIA(StockGet):
         #print(dfc)
   
         return dfc
+
 

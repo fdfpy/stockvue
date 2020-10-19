@@ -82,11 +82,9 @@
       <p> <input type="radio" name="d_mei" value="ALL" v-model="dis_meigara"> 全銘柄 
           <input type="radio" name="d_mei" value="HOLD" v-model="dis_meigara"> HOLD銘柄
           <input type="radio" name="d_mei" value="A0" v-model="dis_meigara"> [A0]
-          <input type="radio" name="d_mei" value="A10" v-model="dis_meigara"> [A10]
-          <input type="radio" name="d_mei" value="A11" v-model="dis_meigara"> [A11]
-          <input type="radio" name="d_mei" value="A20" v-model="dis_meigara"> [A20] 
-          <input type="radio" name="d_mei" value="A21" v-model="dis_meigara"> [A21] </p>
-
+          <input type="radio" name="d_mei" value="A1" v-model="dis_meigara"> [A1]
+          <input type="radio" name="d_mei" value="A2" v-model="dis_meigara"> [A2] 
+          <input type="radio" name="d_mei" value="PB" v-model="dis_meigara"> [parabolic] </p>
 
          <!--
         <p><input type="button" value="全銘柄株価取得" class="btn-gradient-radius" @click="allgetdat()"></p>
@@ -104,7 +102,10 @@
             <th>決算日</th>   
             <th>配当<br>利回り</th> 
             <th>Bolinjer</th>
-            <th>一目<br>均衡表</th>                    
+            <th>一目<br>均衡表</th>
+            <th>パラボリック</th>
+            <th>s_ratio</th>  
+            <th>c_ratio</th>                                  
             <th>株価<br>取得</th>           
           </tr>
 
@@ -114,9 +115,9 @@
             <tr v-for="(element,index) in stockdata_matrix"  v-if="dis_meigara=='ALL' ? 'true' : 
                                                                    dis_meigara=='HOLD' ? element[0].hold==TRU : 
                                                                    dis_meigara=='A0' ? element[0].meigara_sta==0 : 
-                                                                   dis_meigara=='A10' ? element[0].meigara_sta==10 :
-                                                                   dis_meigara=='A11' ? element[0].meigara_sta==11 :  
-                                                                   dis_meigara=='A20' ? element[0].meigara_sta==20 : element[0].meigara_sta==21
+                                                                   dis_meigara=='A1' ? element[0].meigara_sta==10 || element[0].meigara_sta==11 :
+                                                                   dis_meigara=='A2' ? element[0].meigara_sta==20 || element[0].meigara_sta==21 :
+                                                                   dis_meigara=='BR' ? Math.abs(element[0].sta)<=3 :Math.abs(element[0].sta)<=3
                                                                    ">
                                             
 
@@ -169,19 +170,34 @@
             <th v-else-if="Math.round(element[0].meigara_sta)==0" bgcolor=#1d8d1d>[A{{Math.round(element[0].meigara_sta)}}]</th> 
             <th v-else-if="Math.round(element[0].meigara_sta)==10" bgcolor=#1d8d1d>[A{{Math.round(element[0].meigara_sta)}}]</th> 
             <th v-else-if="Math.round(element[0].meigara_sta)==11" bgcolor=#1d8d1d>[A{{Math.round(element[0].meigara_sta)}}]</th> 
-            <th v-else>[A{{Math.round(element[0].meigara_sta)}}]</th>                        
+            <th v-else>[A{{Math.round(element[0].meigara_sta)}}]</th> 
+            <!--  パラボリック -->
+
+            <th v-if="Math.round(element[0].sta)>=0 && Math.round(element[0].sta)<=3" bgcolor=#209EDB>{{Math.round(element[0].sta)}}</th> 
+            <th v-else-if="Math.round(element[0].sta)<=0 && Math.round(element[0].sta)>=-3" bgcolor="yellow">{{Math.round(element[0].sta)}}</th>             
+            <th v-else-if="Math.round(element[0].sta)>=4" >U↑</th>             
+            <th v-else-if="Math.round(element[0].sta)<=-4">D↓</th> 
+
+
+
+
+            <!--  sharp ratio -->
+            <th>{{Math.round(100*element[0].sratio)/100}}</th> 
+            <!--  culmer ratio -->
+            <th>{{Math.round(100*element[0].cratio)/100}}</th> 
+            <!--  株価取得 -->                                   
             <th><input type="button" value="取得" @click="getdata(index)"></th> 
           </tr>      
 
         </table>
                      <!-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★   -->
-    <p>一目均衡表記号の説明</p>
+    <p>一目均衡表記号の説明1</p>
     <img src="../assets/meigara_sta.png">
             <p><th><input type="button" class="btn-gradient-radius"  value="RADIKO" @click="goradiko()"></th></p>
             <p><th><input type="button" class="btn-gradient-radius"  value="OTENKI" @click="gootenki()"></th></p>                          
 
                              <!--   {{$data.stockdata_matrix}}   -->
-日経225EPS
+日経225EPS1
 {{$data.kakusyudat_matrix.nikkei225eps}}
 
   </div>
@@ -196,8 +212,9 @@
 import * as d3 from 'd3'  //有効にする
 import * as types from '../store/mutation-types'
 import { mapGetters, mapActions } from 'vuex'
-const consts = require('./const') 
-
+const consts = require('./const')
+//const url='25.32.185.252' 
+//const url='192.168.99.100' 
 
 export default {
 
@@ -209,9 +226,11 @@ export default {
     //【R-1】銘柄の株価データを登録する
     regdata:function(){
         this.result= "register data"
+        console.log( "register data")
+        console.log( consts.url)
         //paramsに登録する銘柄データのパラメータを含んでいる。paramsに格納されたデータをbkendに送る。
-        this.$axios.get('http://25.32.185.252:3000/reg',
-        
+        this.$axios.get('http://' + consts.url + ':3000/reg',
+
           {params:
                 {
                   stock_num:this.stock_num,
@@ -225,7 +244,7 @@ export default {
                 }          
           })
           .then(function(response){
-            //console.log("response.data.message")
+            console.log("response.data.message")
             //console.log(response.data.message)  //バックエンドから返却された演算結果をconsole.logしている。
             this.result= response.data.message.mes
             //console.log("#1#1")          
@@ -238,7 +257,7 @@ export default {
 
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
           .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
-                        
+                   console.log("ERR")     
             this.result="サーバーエラー発生"
             }.bind(this))
           .finally(function(){
@@ -289,7 +308,7 @@ export default {
     //登録された銘柄データをDBから読み出し,「銘柄データ登録」に読み出す。
     readMEIGARA: function (index) {
         this.result= "getting data"
-        this.$axios.get('http://25.32.185.252:3000/meigarainfo',{params:{dat:this.stockdata_matrix[index][0].stock_num}})
+        this.$axios.get('http://' +  consts.url + ':3000/meigarainfo',{params:{dat:this.stockdata_matrix[index][0].stock_num}})
           .then(function(response){
  
             
@@ -328,10 +347,10 @@ export default {
     //登録した全銘柄の株価データを取得する。
     allgetdat:function(){
         this.result= "getting data"
-        this.$axios.get('http://25.32.185.252:3000/apiall',{params:{dat:"1111"}})
+        this.$axios.get('http://'+ consts.url  + ':3000/apiall',{params:{dat:"1111"}})
           .then(function(response){
-            console.log("allgetdat")
-            console.log(response.data.message)  //バックエンドから返却された演算結果をconsole.logしている。
+            //console.log("allgetdat")
+            //console.log(response.data.message)  //バックエンドから返却された演算結果をconsole.logしている。
 
             this.result= response.data.message.mes      
             this.kakusyudat_matrix=this.kakusyu_csvorder(response.data.message.stockdata[1])                  
@@ -347,10 +366,10 @@ export default {
             this.stockdata_matrix=this.csvorder(response.data.message.stockdata[0])              
             }.bind(this))
           .finally(function(){
-                 console.log("this.kakusyudat_matrix")
-                 console.log(this.kakusyudat_matrix)
-                 console.log("this.stockdata_matrix")
-                 console.log(this.stockdata_matrix)                 
+                 //console.log("this.kakusyudat_matrix")
+                 //console.log(this.kakusyudat_matrix)
+                 //console.log("this.stockdata_matrix")
+                 //console.log(this.stockdata_matrix)                 
                  this.stock_num=998407
                  this.c_name="日経225"
                  this.eps=1606
@@ -367,9 +386,9 @@ export default {
     //指定した銘柄の株価データを取得する。
     getdata:function(index){
         this.result= "getting data"
-        this.$axios.get('http://25.32.185.252:3000/api',{params:{dat:this.stockdata_matrix[index][0].stock_num}})
+        this.$axios.get('http://' + consts.url  + ':3000/api',{params:{dat:this.stockdata_matrix[index][0].stock_num}})
           .then(function(response){
-            console.log(response.data.message)  //バックエンドから返却された演算結果をconsole.logしている。
+            //console.log(response.data.message)  //バックエンドから返却された演算結果をconsole.logしている。
             this.result= response.data.message.mes
             this.stockdata_matrix=this.csvorder(response.data.message.stockdata[0])
             //location.reload();
@@ -383,8 +402,8 @@ export default {
       
     //原油、米国国債・・・をマトリックスに整理する関数
     kakusyu_csvorder:function(dat){
-      console.log("dat")
-      console.log(dat)
+      //console.log("dat")
+      //console.log(dat)
       let divdats=dat.split(",")  //datデータを","で分割し、配列に格納する
       let divdats_length=divdats.length  
       var stockdat_matrix = new Array(divdats_length-1) 
@@ -414,6 +433,8 @@ export default {
       let divdats=dat.split("\n")  //datデータを"\n"で分割し、配列に格納する
       let divdats_length=divdats.length  
       var stockdat_matrix = new Array(divdats_length-1) 
+      console.log("divdats")
+      console.log(divdats)
 
       //各銘柄情報をマトリックスに格納する。各データにはキー値を付与している。
       divdats.forEach(function(divdat,k){
@@ -440,7 +461,12 @@ export default {
         tenkan:divdat.split(",")[16], //転換線最新値
         confval:{confval0:divdat.split(",")[17],confval1:divdat.split(",")[18],confval2:divdat.split(",")[19]}, //明日下落値算出時に設定した確率
         coeff:{coeff0:divdat.split(",")[20],coeff1:divdat.split(",")[21],coeff2:divdat.split(",")[22]}, //明日下落値算出時近似直線当てはまり度合い
-        kagenchi:{kagenchi0:divdat.split(",")[23],kagenchi1:divdat.split(",")[24],kagenchi2:divdat.split(",")[25]}//明日下落値
+        kagenchi:{kagenchi0:divdat.split(",")[23],kagenchi1:divdat.split(",")[24],kagenchi2:divdat.split(",")[25]},//明日下落値
+        sar:divdat.split(",")[26],//パラボリックSAR値
+        sta:divdat.split(",")[27],//パラボリックSTA値
+        sratio:divdat.split(",")[28],//sharp ratio
+        cratio:divdat.split(",")[29],//culmer ratio
+
         })
       //★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★  
 
@@ -450,8 +476,8 @@ export default {
           stockdat_matrix[k]=tmp
         }
       })
-      console.log("stockdat_matrix[0]") 
-      console.log(stockdat_matrix[0])   //for debug
+      //console.log("stockdat_matrix[0]") 
+      //console.log(stockdat_matrix[0])   //for debug
       return stockdat_matrix
     },
 
@@ -481,7 +507,7 @@ export default {
         hold:divdat.split(",")[14],      
         })
       //★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★  
-        console.log("#7")
+        //console.log("#7")
 
         //最終行に余計な空白行が入ることを阻止するために入れたコード
          if(k<divdats_length-1){ 
@@ -505,7 +531,7 @@ export default {
            }         
 
         //paramsに登録する銘柄データのパラメータを含んでいる。paramsに格納されたデータをbkendに送る。
-        this.$axios.get('http://25.32.185.252:3000/del',
+        this.$axios.get('http://' + consts.url + ':3000/del',
 
           {params:
                 {
@@ -517,26 +543,30 @@ export default {
             this.result= response.data.message.mes              
             this.stockdata_matrix=this.csvorder(response.data.message.stockdata[0])  
             this.kakusyudat_matrix=this.kakusyu_csvorder(response.data.message.stockdata[1])
-            //console.log("this.stockdata_matrix")
+            console.log("this.stockdata_matrix2222")
             //console.log(this.stockdata_matrix) 
+            console.log("this.stockdata_matrix")
+            console.log(this.stockdata_matrix) 
             this.beikokuichi()
+            console.log("A1")
             this.nikkei225=this.stockdata_matrix[this.beikoku_index-1][0].today //日経225読み取り
             this.nikkei225dif=this.stockdata_matrix[this.beikoku_index-1][0].dif //日経225前日比
             this.doller_en=this.stockdata_matrix[this.beikoku_index][0].today //米ドル読み取り
             this.doller_en_dif=this.stockdata_matrix[this.beikoku_index][0].dif //米ドル前日比
             this.sp500=this.stockdata_matrix[this.datlen-1][0].today //SP500読み取り
             this.sp500dif=this.stockdata_matrix[this.datlen-1][0].dif //SP500前日比
-
+            console.log("A2")
             this.datlen=this.stockdata_matrix.length-1 //データ行数
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
           .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
             this.result="サーバーエラー発生"
+            console.log("A3")
             }.bind(this))
           .finally(function(){
 
-
+            console.log("A4")
             this.beikokuichi()
-
+            //console.log("A5")
             }.bind(this))
     },   
 
@@ -585,8 +615,8 @@ export default {
     beikokuichi: function () {
 
       //this.stock_num=this.stockdata_matrix[i][0].stock_num 
-      console.log("this.stockdata_matrix.length")
-      console.log(this.stockdata_matrix.length)
+      //console.log("this.stockdata_matrix.length")
+      //console.log(this.stockdata_matrix.length)
 
       var bei_index
       var stocknum_matrix = new Array(this.stockdata_matrix.length);
@@ -599,15 +629,15 @@ export default {
 
         }
         });
-      console.log("bei_index")   
-      console.log(bei_index)   
+      //console.log("bei_index")   
+      //console.log(bei_index)   
 
       this.beikoku_index=bei_index //米国銘柄の開始位置
-      console.log("this.beikoku_index")   
-      console.log(this.beikoku_index)
+      //console.log("this.beikoku_index")   
+      //console.log(this.beikoku_index)
       this.datlen=this.stockdata_matrix.length
-      console.log("this.datlen")   
-      console.log(this.datlen)     
+      //console.log("this.datlen")   
+      //console.log(this.datlen)     
     }
 
 
@@ -622,8 +652,8 @@ export default {
 
     d3.select("svg").remove()  //ページをオープンしたときにsvgオブジェクトを削除する。
     this.deldata() //銘柄データを取得するだけのダミーコマンド。stock_num=0を削除するメソッドになっているが、stock_num=0は存在しないため、現在登録されている銘柄データを取得できる
-    //console.log("datediff('2020-01-01')")   
-    //console.log(this.datediff('2020-04-29'))
+    console.log("A6")   
+
 
   },
  
@@ -730,7 +760,7 @@ export default {
 
   .page {
     width: auto;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     border: 5px solid #ccc;
     padding: 1em;

@@ -21,5 +21,7 @@ module.exports={
     KEYS:['STOCK_NUM','TODAY','DIF'],
     MOMIAI:10, //一目均衡表もみ合い判定データを棒グラフで表示を開始する位置を指定している。
     RATING:0.005, //一目均衡表もみ合い判定データ RATING以上の基準線の変化が発生した時に変動相場になったとする。
-    VAL2_SMA:10 //当日と前日との変化率2乗値の移動平均設定値
+    VAL2_SMA:10, //当日と前日との変化率2乗値の移動平均設定値
+    HOME:'/home/fdfpy/docshare/',   // アプリのHomeディレクトリ HOME:'/home/'   or    '/home/fdfpy/docshare/'   C:/Users/fdfpy/docshare/  C:\Users\fdfpy\docshare
+    url:'25.32.185.252' ,    
 }

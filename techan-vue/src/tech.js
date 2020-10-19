@@ -3,6 +3,8 @@
 
 import * as d3 from 'd3'  //有効にする
 const consts = require('./components/const')
+const INITIAL_AF=0.02
+const MAX_AF=0.2
 
 var RATING=consts.RATING
 var DURING=consts.MOMIAI
@@ -436,6 +438,90 @@ class TECH{
           }
           return bands;
     }
+
+
+    //***********************************************// 
+    //***** パラボリック解析を行う ******//
+    //***********************************************//
+
+    paraboric(data){
+      let candles=data
+      //console.log('candles')
+      //console.log(candles)
+      var acceleration_factor = INITIAL_AF
+      let bull = true
+      let extreme_price = candles[0].high
+      let temp_sar_array =  [{date:candles[0].date, sar:candles[0].low}]
+      let temp_sar 
+      //console.log('extreme_price:',extreme_price)
+
+      candles.forEach(function(ele,k){
+
+            var current_high = ele.high
+            var current_low =  ele.low
+            var last_sar = temp_sar_array[temp_sar_array.length-1].sar
+            var current_date = ele.date
+
+            if((bull==true  &&  last_sar > current_low) || (bull==false  &&  last_sar < current_high)){
+                  //console.log("touch:",k)
+                  temp_sar = extreme_price
+                  acceleration_factor = INITIAL_AF
+                  if(bull==true){
+                        bull = false
+                        extreme_price = current_low
+                  } else {
+                        bull = true
+                        extreme_price = current_high
+                  }     
+
+            }else{
+                  temp_sar = last_sar + acceleration_factor * (extreme_price - last_sar )
+                  //console.log("nontouch:",k)  
+                  //console.log("acceleration_factor:",acceleration_factor)                    
+                  //console.log("extreme_price:",extreme_price)  
+                  //console.log("last_sar:",last_sar) 
+                   
+      
+
+
+
+
+                  if((bull==true  &&  extreme_price  < current_high) || (bull==false  && extreme_price  > current_low)){
+                        //console.log("acceleration_factor_tmp:",acceleration_factor)
+                        acceleration_factor = Math.min(acceleration_factor + INITIAL_AF, MAX_AF)
+
+                        //console.log("acceleration_factor revise:",k)  
+                        //console.log("acceleration_factor:",acceleration_factor) 
+                  }
+                  if(k>1){
+                        if(bull==true){
+                              //console.log("TRUE",k)                             
+                              temp_sar =  Math.min(temp_sar, candles[k-1].low, candles[k-2].low)
+                              extreme_price = Math.max(extreme_price, current_high)
+                        }else{
+                              //console.log("FALSE",k)
+                              temp_sar =  Math.max(temp_sar, candles[k-1].high, candles[k-2].high)
+                              extreme_price = Math.min(extreme_price, current_low)
+
+                        }
+                  }      
+                  
+
+            }
+
+            if(k==0){
+                  temp_sar_array[temp_sar_array.length-1] = ({date:ele.date, sar:temp_sar})
+            }else{
+                  temp_sar_array.push({date:ele.date, sar:temp_sar})
+            }
+      });
+
+      console.log('temp_sar_array:',temp_sar_array)
+      return temp_sar_array
+
+    }
+
+
 
   }
 

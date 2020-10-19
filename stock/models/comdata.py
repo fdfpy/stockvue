@@ -91,9 +91,9 @@ class CTRL():
         kinribox.update(nikkeieps)
         df = pd.DataFrame(kinribox) #データをMatrixに格納する
         df.to_csv(self.CSV_FILEPATH) #dfの内容をcsvファイルに書き出す。
-        print(df)
+        #print(df)
 
-print("AAA")
+#print("AAA")
 CSV_KAKUSYUPATH='/home/pi/dcshare/stock/kakusyudat.csv'
 #CSV_KAKUSYUPATH='/home/stock/kakusyudat.csv'
 test= CTRL(CSV_KAKUSYUPATH)

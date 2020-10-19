@@ -11,7 +11,7 @@ import sys
 d = datetime.datetime.today()
 
 stocknum = sys.stdin.readline()  #標準入力からデータを取得する
-#stocknum=str(5368) #for debug
+#stocknum=str(4345) #for debug
 #stocknum='VOOV' #for debug
 stocknum=stocknum.split("\n")[0] #フロントエンドから送られるデータは"\n"が付与されるので"\n"を削除している。
 #stocknum=int(stocknum)

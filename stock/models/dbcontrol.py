@@ -14,9 +14,12 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 
 #★★  銘柄パラメータを増やすときに追記する箇所★★★ 
-CSV_COLUMNS = ['STOCK_NUM', 'TODAY', 'DIF','C_NAME','EPS','BAND','P1SIG','P05SIG','N1SIG','N05SIG','HAITOUB','HOLD','MEIGARA_STA','TENKAN','CONFVAL0','CONFVAL1','CONFVAL2','COEFF0','COEFF1','COEFF2','KAGENCHI0','KAGENCHI1','KAGENCHI2']
+CSV_COLUMNS = ['STOCK_NUM', 'TODAY', 'DIF','C_NAME','EPS','BAND','P1SIG','P05SIG','N1SIG',
+'N05SIG','HAITOUB','HOLD','MEIGARA_STA','TENKAN','CONFVAL0','CONFVAL1','CONFVAL2','COEFF0',
+'COEFF1','COEFF2','KAGENCHI0','KAGENCHI1','KAGENCHI2',
+'SAR','STA','SRATIO','CRATIO'
+]
 #★★★★★★★★★★★★★★★★★★ 
-
 
 #self.comb = [self.stocknum,self.today_kabuka,self.dif_kabuka]
 class DBCONT(object):
@@ -52,8 +55,10 @@ class DBCONT(object):
         kagenchi0=data['cri0']['kagenchi']
         kagenchi1=data['cri1']['kagenchi']
         kagenchi2=data['cri2']['kagenchi']
-
-        #for debug
+        sar=data['para_sar']
+        sta=data['para_status']
+        sratio=data['sharp_ratio']
+        cratio=data['culmar_ratio']
         # confval0=1
         # confval1=1
         # confval2=1
@@ -83,11 +88,12 @@ class DBCONT(object):
                          tenkan,
                          confval0,confval1,confval2,
                          coeff0,coeff1,coeff2,
-                         kagenchi0,kagenchi1,kagenchi2
+                         kagenchi0,kagenchi1,kagenchi2,
+                         sar,sta,sratio,cratio
                          ) 
 
 
-    def dbkakikomi(self,stock_num,today,dif,band,p1sig,p05sig,n1sig,n05sig,meigara_sta,tenkan,confval0,confval1,confval2,coeff0,coeff1,coeff2,kagenchi0,kagenchi1,kagenchi2):  #各銘柄のボラティリティーをDBに追加する関数
+    def dbkakikomi(self,stock_num,today,dif,band,p1sig,p05sig,n1sig,n05sig,meigara_sta,tenkan,confval0,confval1,confval2,coeff0,coeff1,coeff2,kagenchi0,kagenchi1,kagenchi2,sar,sta,sratio,cratio):  #各銘柄のボラティリティーをDBに追加する関数
         con = sqlite3.connect(self.db_path)
         #print("self.db_path")
         #print(self.db_path)
@@ -95,8 +101,8 @@ class DBCONT(object):
         cur = con.cursor()
 
         #★★★ 銘柄パラメータを増やすときに追記する箇所★★★ 
-        insert_sql='UPDATE STOCK_INFO SET TODAY=?,DIF=?,BAND=?, P1SIG=?, P05SIG=?, N1SIG=?, N05SIG=?, MEIGARA_STA=?,TENKAN=?,CONFVAL0=?,CONFVAL1=?,CONFVAL2=?,COEFF0=?,COEFF1=?,COEFF2=?,KAGENCHI0=?,KAGENCHI1=?,KAGENCHI2=? WHERE STOCK_NUM=?'
-        cur.execute(insert_sql,(today,dif,band,p1sig,p05sig,n1sig,n05sig,meigara_sta,tenkan,confval0,confval1,confval2,coeff0,coeff1,coeff2,kagenchi0,kagenchi1,kagenchi2,stock_num)) # ← where句のstock_numは一番最後に持ってくる。
+        insert_sql='UPDATE STOCK_INFO SET TODAY=?,DIF=?,BAND=?, P1SIG=?, P05SIG=?, N1SIG=?, N05SIG=?, MEIGARA_STA=?,TENKAN=?,CONFVAL0=?,CONFVAL1=?,CONFVAL2=?,COEFF0=?,COEFF1=?,COEFF2=?,KAGENCHI0=?,KAGENCHI1=?,KAGENCHI2=?,SAR=?,STA=?,SRATIO=?,CRATIO=? WHERE STOCK_NUM=?'
+        cur.execute(insert_sql,(today,dif,band,p1sig,p05sig,n1sig,n05sig,meigara_sta,tenkan,confval0,confval1,confval2,coeff0,coeff1,coeff2,kagenchi0,kagenchi1,kagenchi2,sar,sta,sratio,cratio,stock_num)) # ← where句のstock_numは一番最後に持ってくる。
         #★★★★★★★★★★★★★★★★★★ 
         
         #print(cur)      

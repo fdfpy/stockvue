@@ -11,6 +11,10 @@ import pandas_datareader.data as web #米国株データの取得ライブラリ
 from scipy.stats import gaussian_kde
 from scipy.integrate import cumtrapz #pdfを全区間で積分するためのライブラリ
 from sklearn import linear_model
+#import pyfolio as pf
+
+INITIAL_AF = 0.02 #パラボリックパラメータ
+MAX_AF = 0.2 #パラボリックパラメータ
 
 
 
@@ -253,7 +257,10 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
         self.kabuka_get(self.db_s) #銘柄の本日の株価と昨日との差を求める。
         self.vol_get(self.db_s)   #株価のshigma値を取得する。     
         self.ichimoku(self.db_s) #一目均衡表
-        self.bolinger(self.db_s)
+        self.bolinger(self.db_s) #ボリンジャーバンドの計算
+        self.calc_parabolic(self.db_s) #パラボリック解析
+        self.shaperatio(self.db_s) #shape ratioの計算
+        self.calmar(self.db_s)   #calmar ratioの計算
         self.combine()  #DBCONTオブジェクトに渡す変数をまとめる。
  
 
@@ -504,8 +511,6 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
         elif  today_sig["today_p3sig"]<= stock_now :
             self.band="σ<=3"
 
-        
-
 
     def combine(self): #DBCONTオブジェクトに渡す変数をまとめる。
 
@@ -518,13 +523,186 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
                      "n1sig":self.stock_n1sig,
                      "n05sig":self.stock_n05sig,
                      "meigara_sta":self.meigara_sta,
-                     "tenkansen" :self.today_tenkansen
+                     "tenkansen" :self.today_tenkansen,
+                     "para_sar":self.sar_latest,
+                     "para_status":self.status_latest,
+                     "sharp_ratio":self.spr,
+                     "culmar_ratio":self.clmr
         }
 
                     
 
         #print("self.comb")
         #print(self.comb)
+
+    #パラボリック解析
+    def calc_parabolic(self,mat):
+        # 初期値
+        acceleration_factor = INITIAL_AF
+        # INFO: 初期状態は上昇トレンドと仮定して計算
+        bull = True
+        extreme_price = mat.HIGH[0]
+        temp_sar_array = [mat.LOW[0]]
+        status=0
+        status_array=[]
+
+        # HACK: dataframeのまま処理するより、to_dictで辞書配列化した方が処理が早い
+        candles_array = mat.to_dict('records')
+        for i, row in enumerate(candles_array):
+            current_high = row['HIGH']
+            current_low = row['LOW']
+            last_sar = temp_sar_array[-1]
+
+            # レートがparabolicに触れたときの処理
+            if self.parabolic_is_touched(
+                bull=bull,
+                current_parabo=last_sar,
+                current_h=current_high, current_l=current_low
+            ):
+                #print('touch',i)
+                temp_sar = extreme_price
+                acceleration_factor = INITIAL_AF
+                if bull:
+                    bull = False
+                    extreme_price = current_low
+                    status=0
+                else:
+                    bull = True
+                    extreme_price = current_high
+                    status=0
+            else:
+                # SARの仮決め
+                #print('nontouch',i)
+                temp_sar = self.calc_next_parabolic(
+                    last_sar=last_sar, ep=extreme_price, acceleration_f=acceleration_factor
+                )
+                #print("i",i)
+                #print("temp_sar",temp_sar)
+                #print("last_sar",last_sar)
+                #print("extreme_price",extreme_price)
+                #print("acceleration_factor",acceleration_factor)
+
+                # AFの更新
+                if (bull and extreme_price < current_high) \
+                    or not bull and extreme_price > current_low:
+                    acceleration_factor = min(
+                        acceleration_factor + INITIAL_AF,
+                        MAX_AF
+                    )
+                
+                #print("i",i)
+                #print("temp_sar",temp_sar)
+                #print("last_sar",last_sar)
+                #print("extreme_price",extreme_price)
+                #print("acceleration_factor",acceleration_factor)
+                
+                # SARの調整
+                if i>1:
+                    if bull:
+                        temp_sar = min(
+                           temp_sar, candles_array[i-1]['LOW'], candles_array[i-2]['LOW']
+                        )
+                        # print("TRUE",i)
+                        #print("candles_array[i-1]['low']", candles_array[i-1]['low'])
+                        #print("candles_array[i-2]['low']", candles_array[i-2]['low'])                
+                        #print("temp_sar:::",temp_sar)
+                        extreme_price = max(extreme_price, current_high)
+                    else:
+                        temp_sar = max(
+                            temp_sar, candles_array[i-1]['HIGH'], candles_array[i-2]['HIGH']
+                        )
+                        #print("FALSE",i)
+                        extreme_price = min(extreme_price, current_low)
+
+            if i == 0:
+                temp_sar_array[-1] = temp_sar
+                status=1 if bull==True else -1
+                status_array.append(status)
+                #print("temp_sar_array[-1]", temp_sar_array[-1])
+            else:
+                temp_sar_array.append(temp_sar)
+                status=status+1 if bull==True else status-1
+                status_array.append(status)
+
+        self.sar_latest=temp_sar_array[len(temp_sar_array)-1]
+        self.status_latest=status_array[len(status_array)-1]
+        df0 = pd.DataFrame(temp_sar_array,columns=["SAR"])
+        df1= pd.DataFrame(status_array,columns=["STATUS"])
+        dfc=pd.concat([df0, df1],axis=1)
+        #print("dfc",dfc)
+        #print("sar_latest",self.sar_latest)    
+        #print("status_latest",self.status_latest)  
+
+
+
+
+
+
+    def calc_next_parabolic(self,last_sar, ep, acceleration_f=INITIAL_AF):
+        return last_sar + acceleration_f * (ep - last_sar)
+
+
+    def parabolic_is_touched(self,bull, current_parabo, current_h, current_l):
+    
+        #print("current_parabo",current_parabo)
+        #print("current_l", current_l)    
+        #print("current_h", current_h)    
+        #print("not bull", not bull)
+        if bull and (current_parabo > current_l):
+            #print("A1")
+            return True
+        elif not bull and (current_parabo < current_h):
+            #print("A2")
+            return True
+            #print("A3")
+        return False
+
+
+    #Sharp Ratioを計算する関数
+    def shaperatio(self,DF):
+
+        df = DF.copy()
+        df["daily_ret"] = DF["CLOSE"].pct_change() #株価終値の前日との変化率を計算する。
+        ret_ave=np.mean(df["daily_ret"])
+        vol_sp = df["daily_ret"].std()
+        #print("sharp ratio:",math.sqrt(256)*ret_ave/vol_sp) 
+        self.spr=math.sqrt(256)*ret_ave/vol_sp
+
+    #Sharp Ratioを計算する関数
+    def calmar(self,DF):
+        "function to calculate calmar ratio"
+        df = DF.copy()
+        self.clmr = self.CAGR(df)/self.max_dd(df)
+        #print("calmar ratio:",self.clmr) 
+
+
+    def CAGR(self,DF):
+        df = DF.copy()
+        df["daily_ret"] = DF["CLOSE"].pct_change() #株価終値の前日との変化率を計算する。
+        df["cum_return"] = (1 + df["daily_ret"]).cumprod() #cumprod(全要素の累積積を スカラーyに返します.
+        n = len(df)/252 #1年の取引日を252日に設定している。   
+        CAGR = (df["cum_return"][-1])**(1/n) - 1
+        return CAGR
+
+
+    def max_dd(self,DF):
+        "function to calculate max drawdown"
+        df = DF.copy()
+        df["daily_ret"] = DF["CLOSE"].pct_change()
+        df["cum_return"] = (1 + df["daily_ret"]).cumprod()  #cumprod()全要素の掛け算を行う。
+        #print(df["cum_return"])
+
+        #ax.legend() #凡例を描写する
+        df["cum_roll_max"] = df["cum_return"].cummax()
+        df["drawdown"] = df["cum_roll_max"] - df["cum_return"]
+        df["drawdown_pct"] = df["drawdown"]/df["cum_roll_max"]
+        max_dd = df["drawdown_pct"].max()
+        #ax=df["cum_return"].plot(marker="*",figsize=(10, 5))    
+        #ax=df["cum_roll_max"].plot(marker="*",figsize=(10, 5))    
+        #ax=df["drawdown"].plot(marker="*",figsize=(10, 5))   
+        #ax=df["drawdown_pct"].plot(marker="*",figsize=(10, 5))       
+        #ax.legend() #凡例を描写する
+        return max_dd
 
 
 
