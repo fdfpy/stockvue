@@ -117,8 +117,7 @@
                                                                    dis_meigara=='A0' ? element[0].meigara_sta==0 : 
                                                                    dis_meigara=='A1' ? element[0].meigara_sta==10 || element[0].meigara_sta==11 :
                                                                    dis_meigara=='A2' ? element[0].meigara_sta==20 || element[0].meigara_sta==21 :
-                                                                   dis_meigara=='BR' ? Math.abs(element[0].sta)<=3 :Math.abs(element[0].sta)<=3
-                                                                   ">
+                                                                   dis_meigara=='BR' ? (Math.round(element[0].sta)<=-15 || (Math.round(element[0].sta)<=3 && Math.round(element[0].sta)>=-3)):(Math.round(element[0].sta)<=-15 || (Math.round(element[0].sta)<=3 && Math.round(element[0].sta)>=-3))                                                                ">
                                             
 
 
@@ -173,10 +172,12 @@
             <th v-else>[A{{Math.round(element[0].meigara_sta)}}]</th> 
             <!--  パラボリック -->
 
-            <th v-if="Math.round(element[0].sta)>=0 && Math.round(element[0].sta)<=3" bgcolor=#209EDB>{{Math.round(element[0].sta)}}</th> 
-            <th v-else-if="Math.round(element[0].sta)<=0 && Math.round(element[0].sta)>=-3" bgcolor="yellow">{{Math.round(element[0].sta)}}</th>             
-            <th v-else-if="Math.round(element[0].sta)>=4" >U↑</th>             
-            <th v-else-if="Math.round(element[0].sta)<=-4">D↓</th> 
+            <th v-if="Math.round(element[0].sta)>=10 || Math.round(element[0].sta)<=-15" bgcolor=#209EDB>{{Math.round(element[0].sta)}}</th> 
+            <th v-else-if="Math.round(element[0].sta)<=3 && Math.round(element[0].sta)>=-3" bgcolor="yellow">{{Math.round(element[0].sta)}}</th> 
+            <th v-else-if="Math.round(element[0].sta)>3 && Math.round(element[0].sta)<10">U↑</th> 
+            <th v-else-if="Math.round(element[0].sta)>-15 && Math.round(element[0].sta)<-3">D↓</th>             
+              <!-- <th v-else>{{Math.round(element[0].sta)}}</th> -->
+
 
 
 
