@@ -6,7 +6,7 @@
 
 
 
-    <h1>株式投資アプリver0.2</h1>
+    <h1>株式投資アプリver0.27</h1>
    
        <h4>  <font size="6"> 状態 :{{ $data.result }} </font> </h4>
        <!--
@@ -19,23 +19,28 @@
        -->
 
 
-
+        <div class="float_test150">
+           <p><font size="3" color="#000000" face="Meiryo"> VIX指数 </font></p>
+           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-1)"> {{ Math.round(100*$data.vix)/100 }} </a></font></p>
+           <p><font v-if="$data.vixdif>=0" color="green" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.vixdif)/100 }} )</font></p>
+           <p><font v-if="$data.vixdif<0" color="red" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.vixdif)/100 }} )</font></p>           
+        </div>
         <div class="float_test150">
            <p><font size="3" color="#000000" face="Meiryo"> 原油($) </font></p>
-           <p><font size="8" color="#000000" face="Meiryo"> <a href='https://www.trkd-asia.com/rakutensecj/indx.jsp?ind=4&ric=0' target="_blank"> {{ Math.round(100*$data.kakusyudat_matrix.genyu)/100 }} </a></font></p>
-           <p><font v-if="$data.kakusyudat_matrix.genyu_delta>=0" color="green" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.kakusyudat_matrix.genyu_delta)/100 }} )</font></p>
-           <p><font v-if="$data.kakusyudat_matrix.genyu_delta<0" color="red" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.kakusyudat_matrix.genyu_delta)/100 }} )</font></p>           
+           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-5)"> {{ Math.round(100*$data.genyu)/100 }} </a></font></p>
+           <p><font v-if="$data.genyudif>=0" color="green" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.genyudif)/100 }} )</font></p>
+           <p><font v-if="$data.genyudif<0" color="red" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.genyudif)/100 }} )</font></p>           
         </div>
         <div class="float_test150">
            <p><font size="3" color="#000000" face="Meiryo"> 米ドル円(円/$) </font></p>
-           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.beikoku_index)"> {{ Math.round(100*$data.doller_en)/100 }} </a></font></p>
+           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-3)"> {{ Math.round(100*$data.doller_en)/100 }} </a></font></p>
            <p><font v-if="$data.doller_en_dif>=0" color="green" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.doller_en_dif)/100 }} )</font></p>
            <p><font v-if="$data.doller_en_dif<0" color="red" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.doller_en_dif)/100 }} )</font></p>   
         </div>
 
         <div class="float_test150">
            <p><font size="3" color="#000000" face="Meiryo"> SP500 </font></p>
-           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-1)"> {{ Math.round($data.sp500) }} </a></font></p>
+           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-4)"> {{ Math.round($data.sp500) }} </a></font></p>
            <p><font v-if="$data.sp500dif>=0" color="green" size="4" face="Meiryo"> (前日差:{{ Math.round($data.sp500dif) }} )</font></p>
            <p><font v-if="$data.sp500dif<0" color="red" size="4" face="Meiryo"> (前日差:{{ Math.round($data.sp500dif) }} )</font></p>                
         </div> 
@@ -43,16 +48,15 @@
 
         <div class="float_test150">
            <p><font size="3" color="#000000" face="Meiryo"> 日経225 </font></p>
-           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.beikoku_index-1)"> {{ Math.round($data.nikkei225) }} </a></font></p>
+           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-2)"> {{ Math.round($data.nikkei225) }} </a></font></p>
            <p><font v-if="$data.nikkei225dif>=0" color="green" size="4" face="Meiryo"> (前日差:{{ Math.round($data.nikkei225dif) }} )</font></p>
            <p><font v-if="$data.nikkei225dif<0" color="red" size="4" face="Meiryo"> (前日差:{{ Math.round($data.nikkei225dif) }} )</font></p>                
-        </div>     
+        </div>    
 
 
       <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
       <h6>銘柄データ登録</h6>
-      <p>(注1)米ドル円は銘柄番号を9999にしてください。</p>
-      <p>(注2)日経225は銘柄番号を998407にしてください。</p>     
+      <p>WTI原油先物 : ^CLF ,   SP500 : ^GSPC ,   円ドル : ^JPYX ,   日経225 : ^N225 ,   VIX指数 : ^VIX</p> 
     　　<p>
         銘柄番号<input type="text" id="stock_num" v-model="stock_num"> 
     　　会社名<input type="text"  id="c_name" v-model="c_name"> 
@@ -76,7 +80,8 @@
         
 
       <h6>登録銘柄一覧表</h6>
-         登録銘柄は毎日19:00にデータが自動更新されます。
+         登録銘柄は毎日19:00にデータが自動更新されます。<br>
+         <a href='https://nikkei225jp.com/data/shutai.php' target="_blank">外国人投資家動向</a>
           <h4>  <font size="4"> 状態 :{{ $data.result }} </font> </h4>
       <br>表示銘柄<br>
       <p> <input type="radio" name="d_mei" value="ALL" v-model="dis_meigara"> 全銘柄 
@@ -84,8 +89,8 @@
           <input type="radio" name="d_mei" value="A0" v-model="dis_meigara"> [A0]
           <input type="radio" name="d_mei" value="A1" v-model="dis_meigara"> [A1]
           <input type="radio" name="d_mei" value="A2" v-model="dis_meigara"> [A2] 
-          <input type="radio" name="d_mei" value="PB" v-model="dis_meigara"> [parabolic] </p>
-
+          <input type="radio" name="d_mei" value="PB" v-model="dis_meigara"> [parabolic] 
+          <input type="radio" name="d_mei" value="BOL" v-model="dis_meigara"> [bolinjer] </p>
          <!--
         <p><input type="button" value="全銘柄株価取得" class="btn-gradient-radius" @click="allgetdat()"></p>
          -->
@@ -104,7 +109,7 @@
             <th>Bolinjer</th>
             <th>一目<br>均衡表</th>
             <th>パラボリック</th>
-            <th>s_ratio</th>  
+            <th>AR</th>  
             <th>c_ratio</th>                                  
             <th>株価<br>取得</th>           
           </tr>
@@ -117,7 +122,22 @@
                                                                    dis_meigara=='A0' ? element[0].meigara_sta==0 : 
                                                                    dis_meigara=='A1' ? element[0].meigara_sta==10 || element[0].meigara_sta==11 :
                                                                    dis_meigara=='A2' ? element[0].meigara_sta==20 || element[0].meigara_sta==21 :
-                                                                   dis_meigara=='BR' ? (Math.round(element[0].sta)<=-15 || (Math.round(element[0].sta)<=3 && Math.round(element[0].sta)>=-3)):(Math.round(element[0].sta)<=-15 || (Math.round(element[0].sta)<=3 && Math.round(element[0].sta)>=-3))                                                                ">
+                                                                   dis_meigara=='PB' ? 
+                                                                   (
+                                                                     (Math.round(element[0].sta)<=-15 && (element[0].ar>=0.16 && element[0].ar<=0.2))   ||
+                                                                     (( Math.round(element[0].sta)>=4 &&  Math.round(element[0].sta)<=15) && (element[0].ar>=0.06 && element[0].ar<=0.14))
+                                                                   )
+                                                                   :
+                                                                   dis_meigara=='BOL' ?
+                                                                   (
+                                                                      element[0].bol>2   || element[0].bol=='U90' || element[0].bol< -2   || element[0].bol=='D10'
+                                                                   )
+                                                                   :
+                                                                   (
+                                                                     element[0].bol>2   || element[0].bol=='U90' || element[0].bol< -2   || element[0].bol=='D10'
+                                                                    
+                                                                   )
+                                                                    ">
                                             
 
 
@@ -172,18 +192,24 @@
             <th v-else>[A{{Math.round(element[0].meigara_sta)}}]</th> 
             <!--  パラボリック -->
 
-            <th v-if="Math.round(element[0].sta)>=10 || Math.round(element[0].sta)<=-15" bgcolor=#209EDB>{{Math.round(element[0].sta)}}</th> 
+            <th v-if="(Math.round(element[0].sta)<=16 && Math.round(element[0].sta)>=4) || Math.round(element[0].sta)<=-15" bgcolor=#209EDB>{{Math.round(element[0].sta)}}</th> 
             <th v-else-if="Math.round(element[0].sta)<=3 && Math.round(element[0].sta)>=-3" bgcolor="yellow">{{Math.round(element[0].sta)}}</th> 
-            <th v-else-if="Math.round(element[0].sta)>3 && Math.round(element[0].sta)<10">U↑</th> 
+            <th v-else-if="(Math.round(element[0].sta)>0 && Math.round(element[0].sta)<4) || Math.round(element[0].sta)>16">U↑</th> 
             <th v-else-if="Math.round(element[0].sta)>-15 && Math.round(element[0].sta)<-3">D↓</th>             
-              <!-- <th v-else>{{Math.round(element[0].sta)}}</th> -->
+
+
+            <!--  AR -->
+
+            <th v-if="Math.round(element[0].sta)>0  &&  element[0].ar>=0.02 && element[0].ar<=0.14" bgcolor=#209EDB>{{Math.round(100*element[0].ar)/100}}</th> 
+            <th v-else-if="Math.round(element[0].sta)>0  &&  element[0].ar>0.14">U↑</th> 
+            <th v-else-if="Math.round(element[0].sta)<0  &&  element[0].ar<0.16">D↓</th> 
+            <th v-else-if="Math.round(element[0].sta)<0  &&  element[0].ar>=0.16" bgcolor=#209EDB>{{Math.round(100*element[0].ar)/100}}</th>     
 
 
 
 
 
-            <!--  sharp ratio -->
-            <th>{{Math.round(100*element[0].sratio)/100}}</th> 
+
             <!--  culmer ratio -->
             <th>{{Math.round(100*element[0].cratio)/100}}</th> 
             <!--  株価取得 -->                                   
@@ -192,6 +218,10 @@
 
         </table>
                      <!-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★   -->
+
+     <p>Buy条件(パラボリック解析),　「上昇トレンド継続期間:4～15日,  AR:0.06～0.14」  「下降トレンド継続期間:15日～, AR:0.16～0.2」</p>
+
+
     <p>一目均衡表記号の説明1</p>
     <img src="../assets/meigara_sta.png">
             <p><th><input type="button" class="btn-gradient-radius"  value="RADIKO" @click="goradiko()"></th></p>
@@ -286,7 +316,10 @@ export default {
         'update_COEFF',
         'update_CONFVAL',
         'update_TENKAN',
-        'update_KAGENCHI',       
+        'update_KAGENCHI',
+        'update_STA',        
+        'update_AR', 
+        'update_SAR',                 
     ]),
 
     //【vuex】データをdemo.jsを介し、Top.vueからChart.vueに送る
@@ -301,7 +334,10 @@ export default {
       this.update_COEFF(this.stockdata_matrix[i][0].coeff)
       this.update_CONFVAL(this.stockdata_matrix[i][0].confval)
       this.update_TENKAN(this.stockdata_matrix[i][0].tenkan)
-      this.update_KAGENCHI(this.stockdata_matrix[i][0].kagenchi)                                    
+      this.update_KAGENCHI(this.stockdata_matrix[i][0].kagenchi) 
+      this.update_STA(this.stockdata_matrix[i][0].sta) 
+      this.update_AR(this.stockdata_matrix[i][0].ar)       
+      this.update_SAR(this.stockdata_matrix[i][0].sar)        
          //console.log(this.$store.getters.newTodo)    
          //this.test_dat()
     },
@@ -371,7 +407,7 @@ export default {
                  //console.log(this.kakusyudat_matrix)
                  //console.log("this.stockdata_matrix")
                  //console.log(this.stockdata_matrix)                 
-                 this.stock_num=998407
+                 this.stock_num="^N225"
                  this.c_name="日経225"
                  this.eps=1606
                  this.kessan='2018-01-01',
@@ -467,7 +503,7 @@ export default {
         sta:divdat.split(",")[27],//パラボリックSTA値
         sratio:divdat.split(",")[28],//sharp ratio
         cratio:divdat.split(",")[29],//culmer ratio
-
+        ar:divdat.split(",")[30],//パラボリックAR値
         })
       //★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★  
 
@@ -541,21 +577,26 @@ export default {
           })
           .then(function(response){
             
+
             this.result= response.data.message.mes              
             this.stockdata_matrix=this.csvorder(response.data.message.stockdata[0])  
-            this.kakusyudat_matrix=this.kakusyu_csvorder(response.data.message.stockdata[1])
             console.log("this.stockdata_matrix2222")
             //console.log(this.stockdata_matrix) 
             console.log("this.stockdata_matrix")
             console.log(this.stockdata_matrix) 
-            this.beikokuichi()
+            this.beikokuichi()  //米国銘柄の開始位置を特定する
             console.log("A1")
-            this.nikkei225=this.stockdata_matrix[this.beikoku_index-1][0].today //日経225読み取り
-            this.nikkei225dif=this.stockdata_matrix[this.beikoku_index-1][0].dif //日経225前日比
-            this.doller_en=this.stockdata_matrix[this.beikoku_index][0].today //米ドル読み取り
-            this.doller_en_dif=this.stockdata_matrix[this.beikoku_index][0].dif //米ドル前日比
-            this.sp500=this.stockdata_matrix[this.datlen-1][0].today //SP500読み取り
-            this.sp500dif=this.stockdata_matrix[this.datlen-1][0].dif //SP500前日比
+            this.nikkei225=this.stockdata_matrix[this.datlen-2][0].today //日経225読み取り
+            this.nikkei225dif=this.stockdata_matrix[this.datlen-2][0].dif //日経225前日比
+            this.doller_en=this.stockdata_matrix[this.datlen-3][0].today //米ドル読み取り
+            this.doller_en_dif=this.stockdata_matrix[this.datlen-3][0].dif //米ドル前日比
+            this.sp500=this.stockdata_matrix[this.datlen-4][0].today //SP500読み取り
+            this.sp500dif=this.stockdata_matrix[this.datlen-4][0].dif //SP500前日比
+            this.genyu=this.stockdata_matrix[this.datlen-5][0].today  //WTI原油
+            this.genyudif=this.stockdata_matrix[this.datlen-5][0].dif //WTI原油前日比
+            this.vix=this.stockdata_matrix[this.datlen-1][0].today  //WTI原油
+            this.vixdif=this.stockdata_matrix[this.datlen-1][0].dif //WTI原油前日比            
+
             console.log("A2")
             this.datlen=this.stockdata_matrix.length-1 //データ行数
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
@@ -692,6 +733,8 @@ export default {
         sig1_2:'1<=σ<2', //文字列'0<=σ<2'を定数化する。
         sig2_3:'2<=σ<3', //文字列'2<=σ<3'を定数化する。   
         sig3  :'3<=σ', //文字列'3<=σ'を定数化する。 
+        sign_2_3:'-3<=σ<-2', //文字列'-3<=σ<-2'を定数化する。
+        sign_3:'σ<-3', //文字列'σ<-3'を定数化する。        
         TRU:'true',
         dis_meigara:"ALL", //全銘柄を表示する
         holddis:false, //HOLD銘柄のみを表示する。       
@@ -700,8 +743,12 @@ export default {
         kakusyudat_matrix:'', //各種データ(金利、国債など)マトリックス
         nikkei225:'', //本日の日経225
         nikkei225dif:'', //日経225前日比
+        genyu:'', //本日のWTI原油
+        genyudif:'', //本日のWTI原油前日比
         sp500:'', //本日のS&P500
         sp500dif:'',//本日のS&P500前日比
+        vix:'', //本日のVIX指数
+        vixdif:'',//本日のVIX指数前日比
         doller_en:'', //本日の米ドル円
         doller_en_dif:'', //本日の米ドル円前日差
         datlen:'', //データ数

@@ -19,6 +19,9 @@ const state = {
   kagenchi:'',
   confval:'',
   coeff:'', 
+  sta:'',
+  ar:'',
+  sar:'',
 }
 
   
@@ -33,6 +36,9 @@ const getters = {
   KAGENCHI:state => state.kagenchi,
   CONFVAL:state => state.confval,
   COEFF:state => state.coeff,
+  STA:state => state.sta,
+  AR:state => state.ar,
+  SAR:state => state.sar,
 }
 
 // actions
@@ -95,8 +101,23 @@ update_CONFVAL ({dispatch,commit},value) {
 update_COEFF ({dispatch,commit},value) {
      
   commit(types.COEFF, value)
-
 },
+
+update_STA ({dispatch,commit},value) {
+     
+  commit(types.STA, value)
+},
+
+update_AR ({dispatch,commit},value) {
+     
+  commit(types.AR, value)
+},
+
+update_SAR ({dispatch,commit},value) {
+     
+  commit(types.SAR, value)
+},
+
 
 }
 
@@ -142,6 +163,19 @@ const mutations = {
    [types.COEFF](state, data){
     state.coeff = data
    },
+
+   [types.STA](state, data){
+    state.sta = data
+   },
+
+   [types.AR](state, data){
+    state.ar = data
+   },
+
+   [types.SAR](state, data){
+    state.sar = data
+   },
+
 
 }
   

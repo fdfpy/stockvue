@@ -20,7 +20,7 @@ def allproc(stocknum,i,leng) :
     getcriteria2 = analyze.GETCRITERIA(1-c2/100,hosei2,stocknum) #株価データの収集  (本日株価下落率 c0) 
     criteria_all={"cri0":getcriteria0.criteria,"cri1":getcriteria1.criteria,"cri2":getcriteria2.criteria}
     technical.comb.update(criteria_all)
-
+    #print(technical.comb)
     dbcont = dbcontrol.DBCONT(technical.comb) #テクニカル分析の結果をstock.dbとcsvファイルに書き込み
     #dictprocess = dict.DictProcess(technical,stocknum) #テクニカル分析の結果のグラフ作成
     #if  i==(leng-1):  #全銘柄の分析完了後に、EXP-VOLグラフとPER時系列グラフを作成

@@ -17,7 +17,8 @@ stocknum_db = pd.read_csv(setting.CSV_DB_PATH if os.path.exists(setting.CSV_DB_P
                           names=setting.CSV_DB_PATH_COLUMNS,
                           encoding='utf8') #分析する銘柄一覧を取得
                           #CSV_DB_PATH = r'/home/stock/stockdata.csv'
-#print("#2")
+#print("stocknum_db")
+#print(stocknum_db)
 
 i=0
 stocknum_db_len = int(len(stocknum_db['STOCK_NUM']))
@@ -33,17 +34,16 @@ stocknumbox=[]
 
 
 while i < stocknum_db_len:
+    #print(stocknum_db.iloc[i]['STOCK_NUM'].item())   
+    #print(type(stocknum_db.iloc[i]['STOCK_NUM'].item()))  
+
+
+
+
+    controller.process.allproc(stocknum_db.iloc[i]['STOCK_NUM'],i,stocknum_db_len) #stocknum_db.iloc[i]['STOCK_NUM'].item()はnumpy.int64をintに変更する
     #print(stocknum_db['STOCK_NUM'][i].split("\n")[0])
-#銘柄番号9999のときは為替米ドル円を取得する
-    if stocknum_db['STOCK_NUM'][i]==str(9999) :
-        stocknum_db['STOCK_NUM'][i]='USDJPY\n'
-    else:
-        pass
-    
-    
-    controller.process.allproc(stocknum_db['STOCK_NUM'][i].split("\n")[0],i,stocknum_db_len)
-    #print(stocknum_db['STOCK_NUM'][i].split("\n")[0])
-    stocknumbox.append(stocknum_db['STOCK_NUM'][i].split("\n")[0])
+    #stocknumbox.append(stocknum_db['STOCK_NUM'][i].split("\n")[0])
+    stocknumbox.append(str(stocknum_db.iloc[i]['STOCK_NUM']))   
     #print(stocknumbox)
 
     #エラーログ取得のため、どこまで計算を算出したかを記録するコマンド。処理を完了した銘柄番号は外部の指定テキストファイルに書き出しがされる
@@ -55,7 +55,7 @@ while i < stocknum_db_len:
     i=i+1
 
 #米国金利と原油価格のスクレイピングを行う
-kakusyudat = models.comdata.CTRL(setting.CSV_KAKUSYUPATH)
-kakusyudat.allproc()
+#kakusyudat = models.comdata.CTRL(setting.CSV_KAKUSYUPATH)
+#kakusyudat.allproc()
 
 print("## done ##")

@@ -425,8 +425,12 @@ class TECH{
 
     getBollingerBands(n, k, data) {  //n:対象とする日数, k: k*σのkを表す, data:対象とするデータを表す。 
           var bands = []; //{ ma: 0, low: 0, high: 0 }
-          for (var i = n - 1, len = data.length; i < len; i++) {
-              var slice = data.slice(i + 1 - n , i);
+          for (var i = n -1, len = data.length; i < len; i++) {
+              //var slice = data.slice(i + 1 - n , i);
+              var slice = data.slice(i + 1 - n+1 , i+1);             
+              //console.log("slice")
+              //console.log(slice)   
+
               var mean = d3.mean(slice, function(d) { return d.close; });
               var stdDev = Math.sqrt(d3.mean(slice.map(function(d) {
                   return Math.pow(d.close - mean, 2);
@@ -436,6 +440,8 @@ class TECH{
                           low: mean - (k * stdDev),
                           high: mean + (k * stdDev) });
           }
+          console.log("bands")
+          console.log(bands)          
           return bands;
     }
 

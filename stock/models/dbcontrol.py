@@ -13,11 +13,11 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 
 
-#★★  銘柄パラメータを増やすときに追記する箇所★★★ 
+#★★  銘柄パラメータを増やすときに追記する箇所★★★ 2020/12 add
 CSV_COLUMNS = ['STOCK_NUM', 'TODAY', 'DIF','C_NAME','EPS','BAND','P1SIG','P05SIG','N1SIG',
 'N05SIG','HAITOUB','HOLD','MEIGARA_STA','TENKAN','CONFVAL0','CONFVAL1','CONFVAL2','COEFF0',
 'COEFF1','COEFF2','KAGENCHI0','KAGENCHI1','KAGENCHI2',
-'SAR','STA','SRATIO','CRATIO'
+'SAR','STA','SRATIO','CRATIO','AR'
 ]
 #★★★★★★★★★★★★★★★★★★ 
 
@@ -59,6 +59,7 @@ class DBCONT(object):
         sta=data['para_status']
         sratio=data['sharp_ratio']
         cratio=data['culmar_ratio']
+        ar=data['ar'] #2020/12 add
         # confval0=1
         # confval1=1
         # confval2=1
@@ -89,20 +90,20 @@ class DBCONT(object):
                          confval0,confval1,confval2,
                          coeff0,coeff1,coeff2,
                          kagenchi0,kagenchi1,kagenchi2,
-                         sar,sta,sratio,cratio
+                         sar,sta,sratio,cratio,ar #add 2020/12 add
                          ) 
 
 
-    def dbkakikomi(self,stock_num,today,dif,band,p1sig,p05sig,n1sig,n05sig,meigara_sta,tenkan,confval0,confval1,confval2,coeff0,coeff1,coeff2,kagenchi0,kagenchi1,kagenchi2,sar,sta,sratio,cratio):  #各銘柄のボラティリティーをDBに追加する関数
+    def dbkakikomi(self,stock_num,today,dif,band,p1sig,p05sig,n1sig,n05sig,meigara_sta,tenkan,confval0,confval1,confval2,coeff0,coeff1,coeff2,kagenchi0,kagenchi1,kagenchi2,sar,sta,sratio,cratio,ar):  #各銘柄のボラティリティーをDBに追加する関数 2020/12 add
         con = sqlite3.connect(self.db_path)
         #print("self.db_path")
         #print(self.db_path)
         con.text_factory = str
         cur = con.cursor()
 
-        #★★★ 銘柄パラメータを増やすときに追記する箇所★★★ 
-        insert_sql='UPDATE STOCK_INFO SET TODAY=?,DIF=?,BAND=?, P1SIG=?, P05SIG=?, N1SIG=?, N05SIG=?, MEIGARA_STA=?,TENKAN=?,CONFVAL0=?,CONFVAL1=?,CONFVAL2=?,COEFF0=?,COEFF1=?,COEFF2=?,KAGENCHI0=?,KAGENCHI1=?,KAGENCHI2=?,SAR=?,STA=?,SRATIO=?,CRATIO=? WHERE STOCK_NUM=?'
-        cur.execute(insert_sql,(today,dif,band,p1sig,p05sig,n1sig,n05sig,meigara_sta,tenkan,confval0,confval1,confval2,coeff0,coeff1,coeff2,kagenchi0,kagenchi1,kagenchi2,sar,sta,sratio,cratio,stock_num)) # ← where句のstock_numは一番最後に持ってくる。
+        #★★★ 銘柄パラメータを増やすときに追記する箇所★★★  #ass 2020/12 add
+        insert_sql='UPDATE STOCK_INFO SET TODAY=?,DIF=?,BAND=?, P1SIG=?, P05SIG=?, N1SIG=?, N05SIG=?, MEIGARA_STA=?,TENKAN=?,CONFVAL0=?,CONFVAL1=?,CONFVAL2=?,COEFF0=?,COEFF1=?,COEFF2=?,KAGENCHI0=?,KAGENCHI1=?,KAGENCHI2=?,SAR=?,STA=?,SRATIO=?,CRATIO=?,AR=? WHERE STOCK_NUM=?'
+        cur.execute(insert_sql,(today,dif,band,p1sig,p05sig,n1sig,n05sig,meigara_sta,tenkan,confval0,confval1,confval2,coeff0,coeff1,coeff2,kagenchi0,kagenchi1,kagenchi2,sar,sta,sratio,cratio,ar,stock_num)) # ← where句のstock_numは一番最後に持ってくる。
         #★★★★★★★★★★★★★★★★★★ 
         
         #print(cur)      

@@ -16,7 +16,7 @@
 
         <div class="float_test300">
           <p> <font size="2.5" color="red" face="Meiryo"> 売買指標  </font> </p>
-          <p> <font size="2" color="#000000" face="Meiryo"> 転換線 : {{this.tenkan}} (下落値:{{Math.round(get_meigara[1] - this.tenkan)}}) </font> </p>
+          <p> <font size="2" color="#000000" face="Meiryo"> SAR(パラボリック) : {{get_meigara[12]}}</font> </p>
           <p> <font size="2" color="#000000" face="Meiryo"> {{Math.round(100*(1-this.confval.confval0))}}%下限値  : {{this.kagenchi.kagenchi0}} (下落値:{{Math.round(get_meigara[1] - this.kagenchi.kagenchi0)}}) R2:{{Math.round(100*this.coeff.coeff0)/100 }}  </font></p>
           <p> <font size="2" color="#000000" face="Meiryo"> {{Math.round(100*(1-this.confval.confval1))}}%下限値 : {{this.kagenchi.kagenchi1}} (下落値:{{Math.round(get_meigara[1] -this.kagenchi.kagenchi1)}}) R2:{{Math.round(100*this.coeff.coeff1)/100 }}</font></p>
           <p> <font size="2" color="#000000" face="Meiryo"> {{Math.round(100*(1-this.confval.confval2))}}%下限値 : {{this.kagenchi.kagenchi2}}  (下落値:{{Math.round(get_meigara[1] -this.kagenchi.kagenchi2)}}) R2:{{Math.round(100*this.coeff.coeff2)/100 }}</font></p>  
@@ -34,6 +34,17 @@
          <input type="radio" name="rang" value="150" v-model="rang"> <font size="3"> 過去150日 </font> <br>
     </p>  
         </div>
+
+        <div class="float_test150">
+          <p><font size="2" color="#000000" face="Meiryo">トレンド期間</font></p>
+          <p><font size="6" color="#000000" face="Meiryo">{{Math.round(get_meigara[10])}}day</font></p>
+          <p><font size="4" color="#000000" face="Meiryo">(AR:{{Math.round(100*get_meigara[11])/100}})</font></p>      
+        </div>
+
+
+
+
+
 
         <div class="cp_ipradio">
 
@@ -140,14 +151,17 @@ export default {
         tenkan:'TENKAN',
         kagenchi:'KAGENCHI',
         confval:'CONFVAL',
-        coeff:'COEFF'
+        coeff:'COEFF',
+        sta:'STA',
+        ar:'AR',
+        sar:'SAR',        
     }),
 
 
     get_meigara: {     
         get () {
       //  return [this.$store.getters.BCDATA, this.$store.getters.UPDATING_DONE]
-        return [this.stock_num,this.today,this.dif,this.c_name,this.sigval,this.eps,this.tenkan,this.kagenchi,this.confval,this.coeff]
+        return [this.stock_num,this.today,this.dif,this.c_name,this.sigval,this.eps,this.tenkan,this.kagenchi,this.confval,this.coeff,this.sta,this.ar,this.sar]
        },
     },
 
@@ -250,6 +264,17 @@ export default {
             .translate([x(1), 0]);
 
 
+      // var trendline = techan.plot.trendline()
+      //       .xScale(x)
+      //       .yScale(y)
+      //       .on("mouseenter", enter)
+      //       .on("mouseout", out)
+      //       .on("drag", drag);
+
+
+
+
+
 
 
       //**************************************************
@@ -338,7 +363,6 @@ export default {
 
       ohlcSelection.append("g")
             .attr("class", "volume axis");
-
 
 
 

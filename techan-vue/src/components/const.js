@@ -7,7 +7,7 @@ module.exports={
     M_PERIOD:25, //移動平均中期
     L_PERIOD:75, //移動平均長期
     RSI_PERIOD:14, //RSI算出期間
-    BOL_N:20, //ボリンジャーバンド算出対象日数
+    BOL_N:26, //ボリンジャーバンド算出対象日数
     TENKAN_DELAY:9,  //一目均衡表 転換線パラメータ
     KIJYUN_DELAY:26, //一目均衡表 基準線パラメータ
     CHIKOU_DELAY:26,  //一目均衡表 遅行スパンパラメータ

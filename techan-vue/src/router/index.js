@@ -6,7 +6,7 @@ import Top from '@/components/Top'
 import Chart from '@/components/Chart'
 
 import Radiko from '@/components/Radiko'
-import Otenki from '@/components/Otenki'
+import Test from '@/components/Test'
 
 Vue.use(Router)
 
@@ -29,9 +29,9 @@ export default new Router({
       component: Radiko
     },
     {
-      path: '/otenki/',
-      name: 'otenki',
-      component: Otenki
+      path: '/test/',
+      name: 'test',
+      component: Test
     },
 
   ]

@@ -7,7 +7,7 @@ CSV_FILE_PATH = r'/home/stock/stockdata.csv'
 HOME_PATH = r'/home/techan-vue/static/'
 CSV_DB_PATH = r'/home/stock/stockdata.csv'
 #★★★ 銘柄パラメータを増やすときに追記する箇所★★★ 
-CSV_DB_PATH_COLUMNS = ('STOCK_NUM','TODAY','DIF','C_NAME','EPS','BAND','P1SIG','P05SIG','N1SIG','N05SIG','KESSAN','URL','KAISYA','HAITOUB','HOLD','MEIGARA_STA','TENKAN','CONFVAL0','CONFVAL1','CONFVAL2','COEFF0','COEFF1','COEFF2','KAGENCHI0','KAGENCHI1','KAGENCHI2','SAR','STA','SRATIO','CRATIO')
+CSV_DB_PATH_COLUMNS = ('STOCK_NUM','TODAY','DIF','C_NAME','EPS','BAND','P1SIG','P05SIG','N1SIG','N05SIG','KESSAN','URL','KAISYA','HAITOUB','HOLD','MEIGARA_STA','TENKAN','CONFVAL0','CONFVAL1','CONFVAL2','COEFF0','COEFF1','COEFF2','KAGENCHI0','KAGENCHI1','KAGENCHI2','SAR','STA','SRATIO','CRATIO','AR')
 #★★★★★★★★★★★★★★★★★★ 
 CSV_CYU_DB_PATH = r'/home/stock/stockdatacyu.csv'
 #MEIGARA_PATH= r'/home/techan-vue/static/'
@@ -34,7 +34,7 @@ CSV_FILE_PATH_LOCAL = r'/home/pi/dcshare/stock/stockdata.csv'
 HOME_PATH_LOCAL = r'/home/pi/dcshare/techan-vue/static/'
 CSV_DB_PATH_LOCAL = r'/home/pi/dcshare/stock/stockdata.csv'
 #★★★ 銘柄パラメータを増やすときに追記する箇所★★★ 
-CSV_DB_PATH_COLUMNS = ('STOCK_NUM','TODAY','DIF','C_NAME','EPS','BAND','P1SIG','P05SIG','N1SIG','N05SIG','KESSAN','URL','KAISYA','HAITOUB','HOLD','MEIGARA_STA','TENKAN','CONFVAL0','CONFVAL1','CONFVAL2','COEFF0','COEFF1','COEFF2','KAGENCHI0','KAGENCHI1','KAGENCHI2','SAR','STA','SRATIO','CRATIO')
+CSV_DB_PATH_COLUMNS = ('STOCK_NUM','TODAY','DIF','C_NAME','EPS','BAND','P1SIG','P05SIG','N1SIG','N05SIG','KESSAN','URL','KAISYA','HAITOUB','HOLD','MEIGARA_STA','TENKAN','CONFVAL0','CONFVAL1','CONFVAL2','COEFF0','COEFF1','COEFF2','KAGENCHI0','KAGENCHI1','KAGENCHI2','SAR','STA','SRATIO','CRATIO','AR')
 #★★★★★★★★★★★★★★★★★★ 
 CSV_CYU_DB_PATH_LOCAL = r'/home/pi/dcshare/stock/stockdatacyu.csv'
 #MEIGARA_PATH= r'/home/techan-vue/static/'
