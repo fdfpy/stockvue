@@ -13,16 +13,16 @@
         <p><input type="button" value="強制終了 or Reload" class="btn-gradient-radius" @click="endforce()"></p>
         <p><input type="button" value="音量中" class="btn-gradient-radius" @click="vol60()"></p>
         <p><input type="button" value="音量小" class="btn-gradient-radius" @click="vol50()"></p>
-           {{$data}}  
+         
 
-        <p><input type="button" value="戻る" class="btn-gradient-radius"　@click="returnButtonClick()"></p>
+        <p><input type="button" value="家電制御" class="btn-gradient-radius"　@click="goNewTask"></p>
 
 
           **************************  タイマー  ******************************
         <p><input type="button" v-if="!timerOn" value="START" class="btn-gradient-radius" @click="start()"></p>
         <p><input type="button" v-if="timerOn" value="STOP" class="btn-gradient-radius" @click="stop()"></p>
         <p><input type="button" value="RESRT" class="btn-gradient-radius" @click="reset()"></p>
-
+  {{$data}}  
   </div>
 
                        
@@ -36,22 +36,14 @@ import Vue from 'vue'
 import vSelect from 'vue-select' //ライブラリvue-selectを使用する。機能が追加された選択BOX
 import 'vue-select/dist/vue-select.css'
 const consts = require('./constrdk')
-
 Vue.component('v-select', vSelect)  
-
-
 export default {
-
   name: 'radiko',
-
-
   methods:{
-
     //*************************************************************/
     //(1) タイマー：カウントダウンを行う。連続再生モードでは、指定時間になれば次の番組を再生する。
     //***********************************************************/
     count:  function() {
-
       if (this.hour==1 && this.sec==0 && this.min==0){
         this.hour=0
         this.min=59
@@ -76,7 +68,6 @@ export default {
       else if(this.hour==0 && this.sec <= 0 && this.min >= 1){
         this.min --;
         this.sec = 59;}
-
         //0:00:00になればカウントダインを止める。
       else if(this.hour==0 && this.sec <= 0 && this.min <= 0){
         this.complete();
@@ -84,23 +75,18 @@ export default {
       else{
         this.sec  --
       }
-
      },
-
-
      //(1-2) タイマー：カウントダウンを開始する。
     start: function() {
       let self = this;
       this.timerOn = true; //timerがONであることを状態として保持
       this.timerObj = setInterval(function() {self.count()}, 1000)
      },
-
      //(1-3)タイマー：タイマーをストップする。
     stop: function() {
       clearInterval(this.timerObj);
       this.timerOn = false; //timerがOFFであることを状態として保持
     },
-
      //(1-4)タイマー：タイマーをリセットする。
     reset:function(){
       this.hour=1
@@ -108,50 +94,35 @@ export default {
       this.sec=24
       this.timerOn = false
      },
-
-
-
     //*************************************************************/
     //(2) proc:一連のメイン同動作を記述する
     //***********************************************************/
-
-
-
     proc: async function(){
-
       //パラメータ入力モード(sta=99)の場合以下を実行する
       if(this.sta==99){
         await this.getplay() //
-
         //タイムフリー連続再生モード設定 && sta=1(連続再生モード2週目以降)の場合     
         if(this.conti===true && this.sta==1){
           console.log("41")    
           console.log(this.sta)
-
             //再生する番組が本日になるまタイムフリー再生を継続する。           
             while(this.conti===true && this.sta==1){       
               console.log("42")        
               console.log(this.sta)         
             await this.getplay()
             }
-
           //this.result= this.err==0 ? "連続再生終了" : this.result
           location.reload();
-
          }
-
          //タイムフリー単発再生の場合、再生終了後、Webページを再読み込みする。
         else if(this.conti==false && this.sta==2){
           location.reload()
          }
-
          //ライブ放送かつ、「ラジオ番組停止」ボタンをクリックした場合
         else if(this.conti==false && this.sta==0){
           this.result="LIVE放送停止中"
          }
-
        }
-
        //パラメータ入力エラー状態で、初期化せずに「ラジオ番組」再生をクリックした場合、警告する。 
       else if(this.sta==-1){
          this.reset()
@@ -160,13 +131,9 @@ export default {
       
       
      },
-
-
      //*************************************************************/
      //(3) getplay:Radikoを再生する。(メインメソッド)
      //***********************************************************/
-
-
      //ラジオ日経第2の指定された時間の番組にアクセスする
     getplay:async function(){
         this.reset() //カウンターをリセットする
@@ -193,7 +160,6 @@ export default {
             this.result= response.data.message.mes
             this.sta=response.data.message.sta
             //this.err=response.data.message.err
-
             //入力パラメータ不備がバックエンドから返された場合
             if (this.sta==-1){
               this.stop()
@@ -209,20 +175,13 @@ export default {
             console.log("#2")
             }.bind(this))
      },
-
-
      //*************************************************************/
      //(4) end():再生をストップする処理を行う。
      //***********************************************************/
-
-
-
      //再生をストップする
     end: async function () {
-
         this.stop()
         this.reset()
-
          //getplay()実施前に「ラジオ番組停止」をクリックした場合、処理を止める
         if( this.saisei===false ) {
           this.result= "無効操作。「入力モードに戻る」をクリックしてください"
@@ -245,7 +204,6 @@ export default {
               else if(this.sta==2){
                 this.result= "タイムフリー単発停止中"           
                 }
-
               //location.reload();
               }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
             .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
@@ -254,24 +212,19 @@ export default {
               }.bind(this))
             .finally(function(){
                     console.log("END3")            
-
               }.bind(this))
                 console.log("END FINISH")  
         }
      },
-
      //*************************************************************/
      //(5) endforce():Xvfb,chromedriver,chromium-browseのプロセスの強制終了を行い、Webページをreloadする。
      //***********************************************************/
-
     endforce: function () {
-
         this.stop()
         this.reset()
         this.result= "connecting..."
         this.$axios.get('http://' + consts.url +'/endforce')
           .then(function(response){
-
             this.result= response.data.message.mes  
   
             //location.reload();
@@ -284,28 +237,17 @@ export default {
             }.bind(this))
           
      },
-
-
-
      //*************************************************************/
      //(6) repair：エラー発生時,sta=-1となるので,パラメータ入力待機状態(sta=99)に戻す。
      //***********************************************************/
-
     repair: function(){
       this.sta=99
       this.result='Ready'
      },
-
-
      //音量を50%設定にする
     vol50: function () {
-
-
         this.$axios.get('http://' + consts.url +'/vol50')
           .then(function(response){
-
-
-
             //location.reload();
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
           .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
@@ -313,20 +255,13 @@ export default {
             }.bind(this))
           .finally(function(){
             //連続再生モードかつ手動で「ラジオ番組停止」をクリックした場合、RELOADを行う
-
             }.bind(this))
         console.log("VOL50")  
       },
-
      //音量を60%設定にする
     vol60: function () {
-
-
         this.$axios.get('http://' + consts.url +'/vol60')
           .then(function(response){
-
-
-
             //location.reload();
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
           .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
@@ -334,21 +269,13 @@ export default {
             }.bind(this))
           .finally(function(){
             //連続再生モードかつ手動で「ラジオ番組停止」をクリックした場合、RELOADを行う
-
             }.bind(this))
         console.log("VOL60")  
      },
-
-
      //音量を70%設定にする
     vol70: function () {
-
-
         this.$axios.get('http://' + consts.url +'/vol70')
           .then(function(response){
-
-
-
             //location.reload();
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
           .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
@@ -356,24 +283,19 @@ export default {
             }.bind(this))
           .finally(function(){
             //連続再生モードかつ手動で「ラジオ番組停止」をクリックした場合、RELOADを行う
-
             }.bind(this))
         console.log("VOL70")  
      },
-
-
-
      //ひとつ前のページに戻る
     returnButtonClick: function () {
         this.$router.go(-1) // 1つ戻る
     },
- 
+     //Kaden.vueに移動する
+    goNewTask: function () {
+
+      this.$router.push('kaden')   //Kaden.vueに移動する
+    },
    },
-
-
-
-
-
    //「ラジオ番組日付」Boxに入力される値を監視する。値に変化があれば、日付が本日か、それとも本日ではないかを判定する関数
   watch: {
     //指定日と本日との日付け差分を計算する。
@@ -388,9 +310,6 @@ export default {
       this.todayf=(daysDiff>-0.375 && daysDiff<0.625 ? true :false);
      },
    },
-
-
-
  
    //タイマー表記 時間:分:秒を常時2桁表記するためのコード
   computed: {
@@ -405,8 +324,6 @@ export default {
       return timeStrings[0] + ":" + timeStrings[1] +":" + timeStrings[2]
      }
    },
-
-
   data: function(){
     return { 
       result :'Ready',  //状態を格納する変数
@@ -426,15 +343,12 @@ export default {
       cnt:0, //連続再生何回目かを記録する
       saisei:false //「ラジオ番組再生」をクリック:true , 「ラジオ番組再生」クリック前:false
         }  
-
     }
 }
 </script>
 
 
 <style>
-
-
   #large_block {
     width: 1000px;
     height: 200px;
@@ -443,7 +357,6 @@ export default {
     float :left; /* 左側を起点にする */
     border: solid 0.5px; /* 領域のボーダーラインの設定 */
   }   
-
   .float150 {
     height: 150px;              /* 高さ指定 */
     width: 150px;               /* 幅指定 */
@@ -454,7 +367,6 @@ export default {
     border-radius: 10px;/*角の丸み*/
     padding: 0px;
   }
-
   .float300 {
     height: 150px;              /* 高さ指定 */
     width: 300px;               /* 幅指定 */
@@ -465,17 +377,13 @@ export default {
     border-radius: 10px;/*角の丸み*/
     padding: 0px;
   }
-
   h6 {
     font-size: 1.0em;
     padding: 1.5em;
     color: #494949;
     background: #fffaf4;
     border-left: solid 2px #ffaf58;
-
   } 
-
-
   .page {
     width: auto;
     max-width: 800px;
@@ -485,12 +393,9 @@ export default {
     background: white;
     border-radius: 1.5em;
   }
-
-
   #overlay{
     /*　要素を重ねた時の順番　*/
     z-index:1;
-
     /*　画面全体を覆う設定　*/
     position:fixed;
     top:0;
@@ -498,29 +403,23 @@ export default {
     width:100%;
     height:100%;
     background-color:rgba(0,0,0,0.2);    /*　rgb(0,0,0)は黒, a=0.2は透明度　*/
-
     /*　画面の中央に要素を表示させる設定　*/
     display: flex;
     align-items: center;
     justify-content: center;
-
   }
-
   #content{
     z-index:2;
     width:66%;    /*　overlay表示時の白画面が占める大きさ　*/
     padding: 1em;
     background:#fff;
   }
-
-
 h4 {
   background: #b0dcfa; /*背景色*/
   padding: 0.5em;/*文字周りの余白*/
   color: white;/*文字を白に*/
   border-radius: 0.5em;/*角の丸み*/
 }
-
  /*　ボタン　*/
 .btn-gradient-radius {
   display: inline-block;
@@ -531,17 +430,10 @@ h4 {
   background-image: linear-gradient(45deg, #FFC107 0%, #ff8b5f 100%);
   transition: .4s;
 }
-
 .btn-gradient-radius:hover {
   background-image: linear-gradient(45deg, #FFC107 0%, #f76a35 100%);
 }
-
-
-
-
 /***** radio button css  *********/
-
-
 .cp_ipradio {
 	width: 21%;
 	margin: 2em;
@@ -632,7 +524,6 @@ h4 {
 .cp_ipradio .disabled {
 	color: #9e9e9e;
 }
-
 .float_test150 {
     height: 200px;              /* 高さ指定 */
     width: 150px;               /* 幅指定 */
@@ -642,12 +533,4 @@ h4 {
     border: solid 3px #6091d3;/*線*/
     border-radius: 10px;/*角の丸み*/
 }
-
-
-
 </style>
-
-
-
-  
-

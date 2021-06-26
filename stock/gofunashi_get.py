@@ -26,11 +26,11 @@ options.add_argument('--disable-gpu')
 
 
 
-
+#https://kabutan.jp/stock/kabuka?code=1570
 
 
 #指定した期間の有価証券報告書を取得するクラス
-class GOFUNASHI_GET():
+class KABUTAN_GET():
 
     #コンストラクタ
     def __init__(self,syokennum,outputcsv):

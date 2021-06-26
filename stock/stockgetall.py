@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 import controller.process
-import models.comdata
+#import models.comdata
 import pandas as pd
 import setting
 import datetime
@@ -36,11 +36,12 @@ stocknumbox=[]
 while i < stocknum_db_len:
     #print(stocknum_db.iloc[i]['STOCK_NUM'].item())   
     #print(type(stocknum_db.iloc[i]['STOCK_NUM'].item()))  
-
+    #print(stocknum_db.iloc[i]['STOCK_NUM'])  
 
 
 
     controller.process.allproc(stocknum_db.iloc[i]['STOCK_NUM'],i,stocknum_db_len) #stocknum_db.iloc[i]['STOCK_NUM'].item()はnumpy.int64をintに変更する
+  
     #print(stocknum_db['STOCK_NUM'][i].split("\n")[0])
     #stocknumbox.append(stocknum_db['STOCK_NUM'][i].split("\n")[0])
     stocknumbox.append(str(stocknum_db.iloc[i]['STOCK_NUM']))   

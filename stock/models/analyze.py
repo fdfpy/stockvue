@@ -33,79 +33,163 @@ class StockGetTop(object):
         self.M = datetime.datetime.today().month
         self.D = datetime.datetime.today().day
 
+class StockGetTop(object):
+    def __init__(self, stocknum = None):
+
+
+        self.stocknum = str(stocknum)
+        self.Y = datetime.datetime.today().year
+        self.M = datetime.datetime.today().month
+        self.D = datetime.datetime.today().day
+
+
 class StockGet(StockGetTop):
+
     def __init__(self, stocknum = None):
         super().__init__(stocknum)
+    
+    ########## 株探から株価を取得する ##########################
+    
+    @classmethod   
+    def get_kabutan(self,stocknum):
 
-        self.stocknum0=self.stocknum
-
-        if self.stocknum.isnumeric()==True:
-
-            self.path=self.stocknum
-            self.stocknum = self.stocknum +".T"
-
-        elif self.stocknum.isnumeric()==False:
-
-            self.path=self.stocknum
-
-
-        get_stock_f = setting.GET_STOCK_F
-
-        if get_stock_f == 0:
-            
-            if self.stocknum==str("^JPYX"):  #為替
-                self.stocknum="JPY=X"
-            if self.stocknum==str("^CLF"):  #原油
-                self.stocknum="CL=F"  
-
-
-            start=datetime.datetime(self.Y-2, self.M, self.D)
-            end=datetime.datetime(self.Y, self.M, self.D)
-            df=web.DataReader(str(self.stocknum),'yahoo',start,end) #株価データを取得する。
-            self.update_day=df.tail(1)
-            #print(df)
-            #print(self.update_day.index[0].date())  
-            df=df.drop(columns='Adj Close') #列Aを削除する。
-            df.to_csv(setting.HOME_PATH + str(self.path) + ".csv",header=False) #dfを外部のcsvファイルに書き込む 
-            #df.to_csv(setting.HOME_PATH + str(self.stocknum) +".week.csv",header=True) #ダミーデータ
-
-            ##print("self.update_day")
-            ##print(type(self.update_day.index[0])) #index(日付)を取り出す
-
-            dt = self.update_day.index[0]
-            
-            #index(日付)を取り出し日付の形式変換
-            ##dt = datetime.datetime(self.update_day.index[0], '%Y-%m-%d') #index(日付)を取り出し日付の形式変換            
-            self.SY=dt.year #dt(最新の株価の日付)の年を取得
-            self.SM=dt.month #dt(最新の株価の日付)の月を取得
-            self.SD=dt.day #dt(最新の株価の日付)の日を取得
-            #print("self.SY")        
-            #print(self.SY)
-            #print("self.SM")        
-            #print(self.SM)     
-            #print("self.SD")            
-            #print(self.SD) 
-
-            #db_sのindex列を削除する。以降のcodeと合わせるため
-            self.db_s = pd.read_csv(setting.HOME_PATH + str(self.path) + ".csv", index_col=0,names=["DATE","HIGH","LOW","OPEN","CLOSE","VOL"])#index_col=0は列名もデータと一緒に取り出す。
-                #self.db_sw = pd.read_csv(setting.HOME_PATH + str(self.stocknum) + ".week.csv", index_col=0)#index_col=0は列名もデータと一緒に取り出す。
-
-
-            self.db_s=self.db_s.reindex(columns=['CLOSE','OPEN','HIGH','LOW','VOL'])
-
-            
-            self.db_s.to_csv(setting.HOME_PATH + str(self.path) + ".csv",header=True) #ヘッダーの表示を更新して再度csvファイルにデータを書き出す 
-            #print("self.db_s")
-            #print(self.db_s)
-
-
+        dfstmp = pd.read_html("https://kabutan.jp/stock/kabuka?code=" + stocknum)
  
-        elif get_stock_f == 1:
-            #print(setting.HOME_PATH + str(self.stocknum) + ".csv")
-            self.db_s = pd.read_csv(setting.HOME_PATH + str(self.stocknum) + ".csv", index_col=0, parse_dates=True , names=["Stock"])
-            #print(self.db_s)
-            #self.db_sw = pd.read_csv(setting.HOME_PATH + str(self.stocknum) + ".week.csv", index_col=0, parse_dates=True,
-            #                names=["Stock"])
+        #前日から20日前までに株価情報を取得する。
+        dfs20 =  dfstmp[5].head(20).loc[:,['日付','始値','高値','安値','終値','売買高(株)']]
+        dfs20= dfs20.rename(columns={'日付': 'DATE0','始値': 'OPEN', '高値': 'HIGH', '安値': 'LOW', '終値': 'CLOSE', '売買高(株)': 'VOL'  })#各列名を所望の列名に変更する。
+        dfs20['DATE0'] = '20' + dfs20['DATE0']  
+        dfs20['DATE'] = pd.to_datetime(dfs20['DATE0'], format='%Y/%m/%d')
+        dfs20 =  dfs20.loc[:,['OPEN','HIGH','LOW','CLOSE','VOL','DATE']]
+        dfs20 =dfs20.reindex(columns=['DATE','CLOSE','OPEN','HIGH','LOW','VOL'])
+        dfs20.set_index('DATE',inplace=True)
+        dfs20=dfs20.sort_values(['DATE'],ascending = True)
+
+        #本日の株価情報を取得する。  
+        dfstoday =  dfstmp[4].loc[:,['本日','始値','高値','安値','終値','売買高(株)']]
+        dfstoday= dfstoday.rename(columns={'本日': 'DATE0','始値': 'OPEN', '高値': 'HIGH', '安値': 'LOW', '終値': 'CLOSE', '売買高(株)': 'VOL'  })#各列名を所望の列名に変更する。
+        dfstoday['DATE0'] = '20' + dfstoday['DATE0']  
+        dfstoday['DATE'] = pd.to_datetime(dfstoday['DATE0'], format='%Y/%m/%d')
+        dfstoday =  dfstoday.loc[:,['OPEN','HIGH','LOW','CLOSE','VOL','DATE']]
+        dfstoday =dfstoday.reindex(columns=['DATE','CLOSE','OPEN','HIGH','LOW','VOL'])
+        dfstoday.set_index('DATE',inplace=True)
+
+        #前日から20日前までに株価情報 と 本日の株価情報を結合する
+        dfs20 = pd.concat([dfs20,  dfstoday], join='outer') #df0とdf1を和結合させる。
+        return dfs20
+
+
+    @classmethod   
+    def get_kabuka(self,stocknum):
+        
+
+        Y = datetime.datetime.today().year
+        M = datetime.datetime.today().month
+        D = datetime.datetime.today().day
+        start=datetime.datetime(Y-2, M, D)
+        end=datetime.datetime(Y, M, D)
+
+
+        snum=stocknum +".T" if str(stocknum).isnumeric()==True else stocknum 
+
+        df=web.DataReader(snum ,'yahoo',start,end) #株価データを取得する。
+
+        df.reset_index('Date',inplace=True)
+        df=df.drop(columns='Adj Close') #列Aを削除する。
+        df=df.rename(columns={'Date': 'DATE','High': 'HIGH','Low': 'LOW', 'Open': 'OPEN', 'Close': 'CLOSE', 'Volume': 'VOL'})#各列名を所望の列名に変更する。
+        df=df.reindex(columns=['DATE','CLOSE','OPEN','HIGH','LOW','VOL']) #列を入れ替える
+        df.set_index('DATE',inplace=True)
+
+        return df
+
+
+    @classmethod  
+    def kesson(self,x):
+        #print("#x")
+        #x=pd.DataFrame(x)
+        #print(type(x))
+ 
+
+        if x.OPEN=='－':
+            # x.CLOSE = int(x.CLOSE)
+            # x.OPEN = int(x.CLOSE)-1
+            # x.LOW = int(x.CLOSE)-1
+            # x.HIGH =int(x.CLOSE)+1
+            x.CLOSE =30000.0
+            x.OPEN = 29999.0
+            x.LOW = 30001.0
+            x.HIGH =30001.0
+
+
+        #print(x)    
+        return x
+
+
+
+
+    @classmethod   
+    def proc(self,stocknum):
+
+
+        filepath=setting.HOME_PATH + str(stocknum) + ".csv"
+
+        ##(1)株式の場合        
+        if str(stocknum).isnumeric()==True:
+
+            ##(1-1)新規にデータを取得する銘柄
+            if os.path.exists(filepath)==False :
+ 
+                df0=self.get_kabutan(stocknum)
+                df1=self.get_kabuka(stocknum)
+                dfc=pd.concat([df0, df1], join='outer') #df0とdf1を和結合させる。
+                dfc1 = dfc.groupby(level=0).last()  #重複行は削除する。
+
+
+            ##(1-2)すでにデータを取得した銘柄
+            else:
+                df0 = pd.read_csv(str(filepath))#index_col=0は列名もデータと一緒に取り出す。
+                df0['DATE0'] = pd.to_datetime(df0['DATE'], format='%Y/%m/%d') #文字列型日付けを日付け型に変更する
+                df0=df0.drop(columns='DATE') #列Aを削除する。
+                df0=df0.rename(columns={'DATE0': 'DATE'})#各列名を所望の列名に変更する。
+                df0.set_index('DATE',inplace=True)
+
+                df1 = self.get_kabutan(stocknum)
+
+                dfc = pd.concat([df0, df1], join='outer') #df0とdf1を和結合させる。
+                dfc1 = dfc.groupby(level=0).last()  #重複行は削除する。
+   
+
+
+        ##(2)指数系銘柄または米国株の場合
+        else:
+
+
+            if stocknum==str("^JPYX"):  #為替
+                stocknum="JPY=X"
+            if stocknum==str("^CLF"):  #原油
+                stocknum="CL=F"  
+
+            dfc1=self.get_kabuka(stocknum)
+
+        #取引なしの日は「-」が記入され、テクニカル分析ができなくなるので「-」をclose値に置き換える。
+        dfc1=dfc1.apply(lambda x:self.kesson(x),axis=1)
+        #print("dfc1")
+        #print(dfc1)
+
+        #取引なしの日は「-」が記入され、kesson(x)関数で修正処理をしてもデータの型が合わなくなり、以降のテクニカル分析でエラーを発生させる。
+        #よって、再度csvファイルからデータを読み出す処理を実施している。
+        dfc1.to_csv(str(filepath),header=True)
+        dfc1 = pd.read_csv(str(filepath))
+        dfc1['DATE'] = pd.to_datetime(dfc1['DATE'], format='%Y/%m/%d') #文字列型日付けを日付け型に変更する
+        dfc1.set_index('DATE',inplace=True)
+
+
+        self.db_s=dfc1
+
+
+
+
+
 
 
 
@@ -116,7 +200,8 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
     def __init__(self,stocknum):
         super().__init__(stocknum)
         #print("self.db_s")
-        #print(self.db_s)        
+        #print(self.db_s)      
+        StockGet.proc(stocknum)    #株価を取得する。    
         self.kabuka_get(self.db_s) #銘柄の本日の株価と昨日との差を求める。
         self.vol_get(self.db_s)   #株価のshigma値を取得する。     
         self.ichimoku(self.db_s) #一目均衡表
@@ -156,7 +241,7 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
         #print("today_kabuka")
         #print(self.today_kabuka)  
         #print("dif_kabuka")
-        #print(self.dif_kabuka)  
+        #print(round(self.dif_kabuka,1))  
 
     def future_day(self, today,d): #todayのd日後の日付を算出する。
         return datetime.date(today.year, today.month, today.day)+datetime.timedelta(days=d)
@@ -165,7 +250,14 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
     def ichimoku(self, mat): #一目均衡表を計算する。
         #print(mat)
         vec = []
-        today = datetime.datetime.strptime(str(mat.index[len(mat.index)-1]), '%Y-%m-%d') #最新の日付を算出する
+        today=mat.index[len(mat.index)-1]
+        today=datetime.date(today.year, today.month, today.day) #todayは%H:%M:%S'を含むので、%H:%M:%Sを削除する。
+
+        #today = datetime.datetime.strptime(str(mat.index[len(mat.index)-1]), '%Y-%m-%d') #最新の日付を算出する
+
+
+
+
         #print(today)
         todaykabuka=mat.tail(1)['CLOSE'][0]
         for i in range(24):  #最新の日付から25日先の日付までを生成する       
@@ -388,9 +480,10 @@ class Technical(StockGet):  #銘柄の株価よりテクニカル分析計算を
 
     def combine(self): #DBCONTオブジェクトに渡す変数をまとめる。
 
-        self.comb = {"stocknum" :self.stocknum0,
+        self.comb = {"stocknum" :self.stocknum,
                      "today_kabuka" :int(self.today_kabuka),
-                     "dif_kabuka" :int(self.dif_kabuka),
+                     #"dif_kabuka" :round(self.dif_kabuka,1),
+                     "dif_kabuka" :int(self.dif_kabuka),                     
                      "band":self.band,
                      "p1sig":self.stock_p1sig, 
                      "p05sig":self.stock_p05sig,

@@ -246,14 +246,9 @@ import { mapGetters, mapActions } from 'vuex'
 const consts = require('./const')
 //const url='25.32.185.252' 
 //const url='192.168.99.100' 
-
 export default {
-
   name: 'top',
-
   methods:{
-
-
     //【R-1】銘柄の株価データを登録する
     regdata:function(){
         this.result= "register data"
@@ -261,7 +256,6 @@ export default {
         console.log( consts.url)
         //paramsに登録する銘柄データのパラメータを含んでいる。paramsに格納されたデータをbkendに送る。
         this.$axios.get('http://' + consts.url + ':3000/reg',
-
           {params:
                 {
                   stock_num:this.stock_num,
@@ -281,11 +275,8 @@ export default {
             //console.log("#1#1")          
             //console.log(response.data)
             this.stockdata_matrix=this.csvorder(response.data.message.stockdata[0])
-
-
             //console.log("this.stockdata_matrix")
             //console.log(this.stockdata_matrix)           
-
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
           .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
                    console.log("ERR")     
@@ -294,8 +285,6 @@ export default {
           .finally(function(){
             }.bind(this))
     },
-
-
     // 読み込む画像アドレスを自動生成している。
     image_path: function(slug){
       try{
@@ -304,7 +293,6 @@ export default {
         return require("@/assets/" + 0 + ".png");
       }
     },
-
     //【vuex】demo.jsからメソッドを読み出す。
     ...mapActions([
         'update_DATA',
@@ -321,7 +309,6 @@ export default {
         'update_AR', 
         'update_SAR',                 
     ]),
-
     //【vuex】データをdemo.jsを介し、Top.vueからChart.vueに送る
     okButtonClick: function (i) {
       var stoch_numb=this.stockdata_matrix[i][0].stock_num=='9999'? 'USDJPY':this.stockdata_matrix[i][0].stock_num
@@ -341,7 +328,6 @@ export default {
          //console.log(this.$store.getters.newTodo)    
          //this.test_dat()
     },
-
     //登録された銘柄データをDBから読み出し,「銘柄データ登録」に読み出す。
     readMEIGARA: function (index) {
         this.result= "getting data"
@@ -360,27 +346,20 @@ export default {
             this.haitoub=this.meigara_info[0][0].haitoub //配当利回り
             this.kaisya=this.meigara_info[0][0].kaisya //会社概要
             this.hold=(this.meigara_info[0][0].hold=='true') //銘柄保持有無 文字型のtrueではなくBoolen型のtrueを入れなければ意図しない動作をするので注意
-
             //location.reload();
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
           .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
             this.result="サーバーエラー発生"
             }.bind(this))
           .finally(function(){
-
             }.bind(this))
-
     },
-
-
     //chart.vueに移動する
     goNewTask: function (i) {
       //console.log(this.stockdata_matrix[i][0].stock_num)
       this.okButtonClick(i)
       this.$router.push('chart')   //chart.vueに移動する
-
     },
-
     //登録した全銘柄の株価データを取得する。
     allgetdat:function(){
         this.result= "getting data"
@@ -388,12 +367,10 @@ export default {
           .then(function(response){
             //console.log("allgetdat")
             //console.log(response.data.message)  //バックエンドから返却された演算結果をconsole.logしている。
-
             this.result= response.data.message.mes      
             this.kakusyudat_matrix=this.kakusyu_csvorder(response.data.message.stockdata[1])                  
             this.stockdata_matrix=this.csvorder(response.data.message.stockdata[0]) 
           
-
             //location.reload();
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
           .catch(function(error){  //バックエンドからエラーが返却された場合に行う処理について
@@ -418,8 +395,6 @@ export default {
                  location.reload();
             }.bind(this))
     },
-
-
     //指定した銘柄の株価データを取得する。
     getdata:function(index){
         this.result= "getting data"
@@ -461,8 +436,6 @@ export default {
       //console.log(tmp)   //for debug
       return tmp
     },
-
-
     //各銘柄情報をマトリックスに整理する関数
     csvorder:function(dat){
       //console.log("dat")
@@ -472,7 +445,6 @@ export default {
       var stockdat_matrix = new Array(divdats_length-1) 
       console.log("divdats")
       console.log(divdats)
-
       //各銘柄情報をマトリックスに格納する。各データにはキー値を付与している。
       divdats.forEach(function(divdat,k){
       let tmp=[]
@@ -506,8 +478,6 @@ export default {
         ar:divdat.split(",")[30],//パラボリックAR値
         })
       //★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★  
-
-
         //最終行に余計な空白行が入ることを阻止するために入れたコード
          if(k<divdats_length-1){ 
           stockdat_matrix[k]=tmp
@@ -517,21 +487,15 @@ export default {
       //console.log(stockdat_matrix[0])   //for debug
       return stockdat_matrix
     },
-
-
-
     //新規銘柄登録直後に、登録銘柄一覧表に読み出すデータ。csvorderと異なるのは、読み出すパラメータの違い。csvorder_meigarainfoの方が読み出すパラメータは少ない
     csvorder_meigarainfo:function(dat){
-
       let divdats=dat.split("\n")  //datデータを"\n"で分割し、配列に格納する
       let divdats_length=divdats.length  
       var stockdat_matrix = new Array(divdats_length-1) 
-
       //各銘柄情報をマトリックスに格納する。各データにはキー値を付与している。
       divdats.forEach(function(divdat,k){
       let tmp=[]
       //各データにはキー値を付与している。
-
       //★★★ 銘柄パラメータを増やすときに追記する箇所★★★★★★★  
       tmp.push({
         stock_num:divdat.split(",")[0],
@@ -545,7 +509,6 @@ export default {
         })
       //★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★  
         //console.log("#7")
-
         //最終行に余計な空白行が入ることを阻止するために入れたコード
          if(k<divdats_length-1){ 
           stockdat_matrix[k]=tmp
@@ -554,8 +517,6 @@ export default {
       //console.log(stockdat_matrix)   //for debug
       return stockdat_matrix
     },
-
-
      //銘柄の株価データを削除する
     deldata:function(index){
         this.result= "register data"
@@ -566,10 +527,8 @@ export default {
               }catch(e){
             del_stocknum=0
            }         
-
         //paramsに登録する銘柄データのパラメータを含んでいる。paramsに格納されたデータをbkendに送る。
         this.$axios.get('http://' + consts.url + ':3000/del',
-
           {params:
                 {
                   stock_num:del_stocknum
@@ -577,7 +536,6 @@ export default {
           })
           .then(function(response){
             
-
             this.result= response.data.message.mes              
             this.stockdata_matrix=this.csvorder(response.data.message.stockdata[0])  
             console.log("this.stockdata_matrix2222")
@@ -596,7 +554,6 @@ export default {
             this.genyudif=this.stockdata_matrix[this.datlen-5][0].dif //WTI原油前日比
             this.vix=this.stockdata_matrix[this.datlen-1][0].today  //WTI原油
             this.vixdif=this.stockdata_matrix[this.datlen-1][0].dif //WTI原油前日比            
-
             console.log("A2")
             this.datlen=this.stockdata_matrix.length-1 //データ行数
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要
@@ -605,13 +562,11 @@ export default {
             console.log("A3")
             }.bind(this))
           .finally(function(){
-
             console.log("A4")
             this.beikokuichi()
             //console.log("A5")
             }.bind(this))
     },   
-
      //モーダルに表示するデータを記載したメソッド
     openModal: function(i){
       this.stock_num=this.stockdata_matrix[i][0].stock_num
@@ -619,26 +574,18 @@ export default {
       this.kaisya=this.stockdata_matrix[i][0].kaisya
       this.showContent = true
     },
-
      //モーダルを閉じる
     closeModal: function(){
       this.showContent = false
     },
-
-
     //radiko.vueに移動する
     goradiko: function (i) {
       this.$router.push('radiko')   
-
     },
-
     //otenki.vueに移動する
     gootenki: function () {
       this.$router.push('otenki')   
-
     },
-
-
     //2つの日付の差を算出する。
     datediff:function (predat) {
         let flag=''
@@ -652,28 +599,22 @@ export default {
         else  flag="NONE"
         return flag
     },
-
     //米国銘柄の開始位置を特定する
     beikokuichi: function () {
-
       //this.stock_num=this.stockdata_matrix[i][0].stock_num 
       //console.log("this.stockdata_matrix.length")
       //console.log(this.stockdata_matrix.length)
-
       var bei_index
       var stocknum_matrix = new Array(this.stockdata_matrix.length);
-
       this.stockdata_matrix.forEach(function(ele,k){
         stocknum_matrix[k]=ele[0].stock_num 
         if (isNaN(stocknum_matrix[k])==false){
         
         bei_index=k
-
         }
         });
       //console.log("bei_index")   
       //console.log(bei_index)   
-
       this.beikoku_index=bei_index //米国銘柄の開始位置
       //console.log("this.beikoku_index")   
       //console.log(this.beikoku_index)
@@ -681,22 +622,11 @@ export default {
       //console.log("this.datlen")   
       //console.log(this.datlen)     
     }
-
-
-
   },
-
-
-
-
-
   created:function(){
-
     d3.select("svg").remove()  //ページをオープンしたときにsvgオブジェクトを削除する。
     this.deldata() //銘柄データを取得するだけのダミーコマンド。stock_num=0を削除するメソッドになっているが、stock_num=0は存在しないため、現在登録されている銘柄データを取得できる
     console.log("A6")   
-
-
   },
  
   computed: {
@@ -711,8 +641,6 @@ export default {
         },
        }
   },
-
-
   data: function(){
     return { 
         message:'',  //入力データを格納する変数。
@@ -756,15 +684,11 @@ export default {
         
     }
   },
-
 }  
-
 </script>
 
 
 <style>
-
-
   #large_block {
     width: 1000px;
     height: 200px;
@@ -773,7 +697,6 @@ export default {
     float :left; /* 左側を起点にする */
     border: solid 0.5px; /* 領域のボーダーラインの設定 */
   }   
-
   .float150 {
     height: 150px;              /* 高さ指定 */
     width: 150px;               /* 幅指定 */
@@ -784,7 +707,6 @@ export default {
     border-radius: 10px;/*角の丸み*/
     padding: 0px;
   }
-
   .float300 {
     height: 150px;              /* 高さ指定 */
     width: 300px;               /* 幅指定 */
@@ -795,17 +717,13 @@ export default {
     border-radius: 10px;/*角の丸み*/
     padding: 0px;
   }
-
   h6 {
     font-size: 1.0em;
     padding: 1.5em;
     color: #494949;
     background: #fffaf4;
     border-left: solid 2px #ffaf58;
-
   } 
-
-
   .page {
     width: auto;
     max-width: 900px;
@@ -815,12 +733,9 @@ export default {
     background: white;
     border-radius: 1.5em;
   }
-
-
   #overlay{
     /*　要素を重ねた時の順番　*/
     z-index:1;
-
     /*　画面全体を覆う設定　*/
     position:fixed;
     top:0;
@@ -828,29 +743,23 @@ export default {
     width:100%;
     height:100%;
     background-color:rgba(0,0,0,0.2);    /*　rgb(0,0,0)は黒, a=0.2は透明度　*/
-
     /*　画面の中央に要素を表示させる設定　*/
     display: flex;
     align-items: center;
     justify-content: center;
-
   }
-
   #content{
     z-index:2;
     width:66%;    /*　overlay表示時の白画面が占める大きさ　*/
     padding: 1em;
     background:#fff;
   }
-
-
 h4 {
   background: #b0dcfa; /*背景色*/
   padding: 0.5em;/*文字周りの余白*/
   color: white;/*文字を白に*/
   border-radius: 0.5em;/*角の丸み*/
 }
-
  /*　ボタン　*/
 .btn-gradient-radius {
   display: inline-block;
@@ -861,17 +770,10 @@ h4 {
   background-image: linear-gradient(45deg, #FFC107 0%, #ff8b5f 100%);
   transition: .4s;
 }
-
 .btn-gradient-radius:hover {
   background-image: linear-gradient(45deg, #FFC107 0%, #f76a35 100%);
 }
-
-
-
-
 /***** radio button css  *********/
-
-
 .cp_ipradio {
 	width: 21%;
 	margin: 2em;
@@ -962,7 +864,6 @@ h4 {
 .cp_ipradio .disabled {
 	color: #9e9e9e;
 }
-
 .float_test150 {
     height: 200px;              /* 高さ指定 */
     width: 150px;               /* 幅指定 */
@@ -972,11 +873,4 @@ h4 {
     border: solid 3px #6091d3;/*線*/
     border-radius: 10px;/*角の丸み*/
 }
-
-
-
 </style>
-
-
-
-  

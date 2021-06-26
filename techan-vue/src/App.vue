@@ -13,7 +13,6 @@
 // eslint-disable-next-line
 /* eslint-disable */ 
 import Top from '/home/techan-vue/src/components/Top.vue'
-
 export default {
   name: 'app',
   components:{
@@ -24,8 +23,6 @@ export default {
             mes: 'Hello Vue3!!'
         }
     }
-
-
 }
 </script>
 

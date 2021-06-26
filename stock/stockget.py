@@ -11,7 +11,7 @@ import sys
 d = datetime.datetime.today()
 
 stocknum = sys.stdin.readline()  #標準入力からデータを取得する #for normal
-#stocknum=str(5388) #for debug
+#stocknum=str(1570) #for debug
 #stocknum=str("JPYX") #for debug
 
 #stocknum='VOOV' #for debug
