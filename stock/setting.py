@@ -44,6 +44,7 @@ STOCKDEL_PATH_LOCAL=r'/home/pi/dcshare/stock/stockdel.json'
 CSV_KAIYSADAT_PATH_LOCAL=r'/home/pi/dcshare/stock/kaisyadat.csv'
 STOCKNUM_PATH_LOCAL=r'/home/pi/dcshare/stock/stocknum.txt'
 CSV_KAKUSYUPATH_LOCAL='/home/pi/dcshare/stock/kakusyudat.csv' #金利,原油,・・・の情報
+ERRFILE_PATH='/home/pi/dcshare/stock/err.txt'
 
 
 

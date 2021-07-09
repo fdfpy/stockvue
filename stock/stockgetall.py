@@ -25,6 +25,16 @@ stocknum_db_len = int(len(stocknum_db['STOCK_NUM']))
 #print("#3")
 #print(stocknum_db_len)
 
+#株価データ取得に失敗した銘柄を記録するファイルを用意する
+with open(setting.ERRFILE_PATH, mode='w') as f:
+    pass
+f.close()
+
+
+
+
+
+
 
 
 stocknumbox=[]
@@ -39,9 +49,16 @@ while i < stocknum_db_len:
     #print(stocknum_db.iloc[i]['STOCK_NUM'])  
 
 
+    try:
+        controller.process.allproc(stocknum_db.iloc[i]['STOCK_NUM'],i,stocknum_db_len) #stocknum_db.iloc[i]['STOCK_NUM'].item()はnumpy.int64をintに変更する
+    except Exception as e:
 
-    controller.process.allproc(stocknum_db.iloc[i]['STOCK_NUM'],i,stocknum_db_len) #stocknum_db.iloc[i]['STOCK_NUM'].item()はnumpy.int64をintに変更する
-  
+        with open(setting.ERRFILE_PATH, mode='a') as f:
+            f.write(str(stocknum_db.iloc[i]['STOCK_NUM'])+',')
+        f.close()    
+   
+
+
     #print(stocknum_db['STOCK_NUM'][i].split("\n")[0])
     #stocknumbox.append(stocknum_db['STOCK_NUM'][i].split("\n")[0])
     stocknumbox.append(str(stocknum_db.iloc[i]['STOCK_NUM']))   

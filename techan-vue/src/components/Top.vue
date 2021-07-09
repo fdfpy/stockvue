@@ -33,14 +33,14 @@
         </div>
         <div class="float_test150">
            <p><font size="3" color="#000000" face="Meiryo"> 米ドル円(円/$) </font></p>
-           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-3)"> {{ Math.round(100*$data.doller_en)/100 }} </a></font></p>
+           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-2)"> {{ Math.round(100*$data.doller_en)/100 }} </a></font></p>
            <p><font v-if="$data.doller_en_dif>=0" color="green" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.doller_en_dif)/100 }} )</font></p>
            <p><font v-if="$data.doller_en_dif<0" color="red" size="4" face="Meiryo"> (前日差 :{{ Math.round(100*$data.doller_en_dif)/100 }} )</font></p>   
         </div>
 
         <div class="float_test150">
            <p><font size="3" color="#000000" face="Meiryo"> SP500 </font></p>
-           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-4)"> {{ Math.round($data.sp500) }} </a></font></p>
+           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-3)"> {{ Math.round($data.sp500) }} </a></font></p>
            <p><font v-if="$data.sp500dif>=0" color="green" size="4" face="Meiryo"> (前日差:{{ Math.round($data.sp500dif) }} )</font></p>
            <p><font v-if="$data.sp500dif<0" color="red" size="4" face="Meiryo"> (前日差:{{ Math.round($data.sp500dif) }} )</font></p>                
         </div> 
@@ -48,7 +48,7 @@
 
         <div class="float_test150">
            <p><font size="3" color="#000000" face="Meiryo"> 日経225 </font></p>
-           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-2)"> {{ Math.round($data.nikkei225) }} </a></font></p>
+           <p><font size="8" color="#000000" face="Meiryo"> <a v-on:click="goNewTask($data.datlen-11)"> {{ Math.round($data.nikkei225) }} </a></font></p>
            <p><font v-if="$data.nikkei225dif>=0" color="green" size="4" face="Meiryo"> (前日差:{{ Math.round($data.nikkei225dif) }} )</font></p>
            <p><font v-if="$data.nikkei225dif<0" color="red" size="4" face="Meiryo"> (前日差:{{ Math.round($data.nikkei225dif) }} )</font></p>                
         </div>    
@@ -311,7 +311,8 @@ export default {
     ]),
     //【vuex】データをdemo.jsを介し、Top.vueからChart.vueに送る
     okButtonClick: function (i) {
-      var stoch_numb=this.stockdata_matrix[i][0].stock_num=='9999'? 'USDJPY':this.stockdata_matrix[i][0].stock_num
+      //var stoch_numb=this.stockdata_matrix[i][0].stock_num=='9999'? 'USDJPY':this.stockdata_matrix[i][0].stock_num
+      var stoch_numb=this.stockdata_matrix[i][0].stock_num
       this.update_DATA(stoch_numb)
       this.update_TODAY(this.stockdata_matrix[i][0].today)  
       this.update_DIF(this.stockdata_matrix[i][0].dif)
@@ -544,16 +545,16 @@ export default {
             console.log(this.stockdata_matrix) 
             this.beikokuichi()  //米国銘柄の開始位置を特定する
             console.log("A1")
-            this.nikkei225=this.stockdata_matrix[this.datlen-2][0].today //日経225読み取り
-            this.nikkei225dif=this.stockdata_matrix[this.datlen-2][0].dif //日経225前日比
-            this.doller_en=this.stockdata_matrix[this.datlen-3][0].today //米ドル読み取り
-            this.doller_en_dif=this.stockdata_matrix[this.datlen-3][0].dif //米ドル前日比
-            this.sp500=this.stockdata_matrix[this.datlen-4][0].today //SP500読み取り
-            this.sp500dif=this.stockdata_matrix[this.datlen-4][0].dif //SP500前日比
+            this.nikkei225=this.stockdata_matrix[this.datlen-11][0].today //日経225読み取り
+            this.nikkei225dif=this.stockdata_matrix[this.datlen-11][0].dif //日経225前日比
+            this.doller_en=this.stockdata_matrix[this.datlen-2][0].today //米ドル読み取り
+            this.doller_en_dif=this.stockdata_matrix[this.datlen-2][0].dif //米ドル前日比
+            this.sp500=this.stockdata_matrix[this.datlen-3][0].today //SP500読み取り
+            this.sp500dif=this.stockdata_matrix[this.datlen-3][0].dif //SP500前日比
             this.genyu=this.stockdata_matrix[this.datlen-5][0].today  //WTI原油
             this.genyudif=this.stockdata_matrix[this.datlen-5][0].dif //WTI原油前日比
-            this.vix=this.stockdata_matrix[this.datlen-1][0].today  //WTI原油
-            this.vixdif=this.stockdata_matrix[this.datlen-1][0].dif //WTI原油前日比            
+            this.vix=this.stockdata_matrix[this.datlen-1][0].today  //VIX
+            this.vixdif=this.stockdata_matrix[this.datlen-1][0].dif //VIX原油前日比            
             console.log("A2")
             this.datlen=this.stockdata_matrix.length-1 //データ行数
             }.bind(this))  //Promise処理を行う場合は.bind(this)が必要

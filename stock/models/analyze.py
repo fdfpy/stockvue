@@ -11,7 +11,10 @@ import pandas_datareader.data as web #米国株データの取得ライブラリ
 from scipy.stats import gaussian_kde
 from scipy.integrate import cumtrapz #pdfを全区間で積分するためのライブラリ
 from sklearn import linear_model
-#import pyfolio as pf
+from pandas_datareader import data as pdr
+import yfinance as yfin
+import requests, bs4
+yfin.pdr_override()
 
 INITIAL_AF = 0.02 #パラボリックパラメータ
 MAX_AF = 0.2 #パラボリックパラメータ
@@ -53,10 +56,67 @@ class StockGet(StockGetTop):
     @classmethod   
     def get_kabutan(self,stocknum):
 
-        dfstmp = pd.read_html("https://kabutan.jp/stock/kabuka?code=" + stocknum)
- 
+        # if stocknum==0:
+        #     stocknum=str("0000")
+        # print("stocknum")
+        # print(str(stocknum))
+
+        #stocknum=str(stocknum)
+        if stocknum==str(9999):
+            res = requests.get('https://kabutan.jp/stock/kabuka?code=0000&ashi=day')
+            res.raise_for_status()
+            soup = bs4.BeautifulSoup(res.text, "html.parser")
+
+            def datconv(moji):
+                return int(float(moji.get_text().replace(',', '')))
+
+
+            today_225=soup.find_all("table")[4] #日経225本日の株価データ抽出
+            kako_225=soup.find_all("table")[5] #日経225過去30日分のデータを抽出する
+
+            #本日の日経225'始値','高値','安値','終値','売買高(株)'をスクレイピングする
+            t225_dat=[[today_225.find("time").get_text(),
+                datconv(today_225.find_all("td")[0]),        
+                datconv(today_225.find_all("td")[1]),        
+                datconv(today_225.find_all("td")[2]),        
+                datconv(today_225.find_all("td")[3]),
+                datconv(today_225.find_all("td")[6]),
+                ]]
+
+            i=0
+            kako225_data=[]
+            #過去14日に日経平均株価を吸いクレイピングする
+            for i in range (0,14):
+                kako225_tmp=[kako_225.find_all("time")[i].get_text(),
+                    datconv(kako_225.find_all("td")[0+7*i]),        
+                    datconv(kako_225.find_all("td")[1+7*i]),        
+                    datconv(kako_225.find_all("td")[2+7*i]),        
+                    datconv(kako_225.find_all("td")[3+7*i]),
+                    datconv(kako_225.find_all("td")[6+7*i]),
+                    ] 
+    
+                kako225_data.append(kako225_tmp)
+
+
+            df_today_225=pd.DataFrame(t225_dat,columns=['本日','始値','高値','安値','終値','売買高(株)'])
+            df_kako_225=pd.DataFrame(kako225_data,columns=['日付','始値','高値','安値','終値','売買高(株)'])
+
+
+            #dfstmp=pd.concat([df_today_225, df_kako_225], join='outer')
+
+
+        else:
+
+            dfstmp = pd.read_html("https://kabutan.jp/stock/kabuka?code=" + str(stocknum))
+
+
+
+
         #前日から20日前までに株価情報を取得する。
-        dfs20 =  dfstmp[5].head(20).loc[:,['日付','始値','高値','安値','終値','売買高(株)']]
+        #print("dfstmp[5]")
+        #print(dfstmp[5])
+        #dfs20 =  dfstmp[5].head(20).loc[:,['日付','始値','高値','安値','終値','売買高(株)']]
+        dfs20 = df_kako_225 if stocknum==str(9999) else dfstmp[5].head(20).loc[:,['日付','始値','高値','安値','終値','売買高(株)']]
         dfs20= dfs20.rename(columns={'日付': 'DATE0','始値': 'OPEN', '高値': 'HIGH', '安値': 'LOW', '終値': 'CLOSE', '売買高(株)': 'VOL'  })#各列名を所望の列名に変更する。
         dfs20['DATE0'] = '20' + dfs20['DATE0']  
         dfs20['DATE'] = pd.to_datetime(dfs20['DATE0'], format='%Y/%m/%d')
@@ -64,10 +124,16 @@ class StockGet(StockGetTop):
         dfs20 =dfs20.reindex(columns=['DATE','CLOSE','OPEN','HIGH','LOW','VOL'])
         dfs20.set_index('DATE',inplace=True)
         dfs20=dfs20.sort_values(['DATE'],ascending = True)
+        #print("dfs20")
+        #print(dfs20)
 
         #本日の株価情報を取得する。  
-        dfstoday =  dfstmp[4].loc[:,['本日','始値','高値','安値','終値','売買高(株)']]
+        dfstoday = df_today_225 if stocknum==str(9999) else dfstmp[4].loc[:,['本日','始値','高値','安値','終値','売買高(株)']]
         dfstoday= dfstoday.rename(columns={'本日': 'DATE0','始値': 'OPEN', '高値': 'HIGH', '安値': 'LOW', '終値': 'CLOSE', '売買高(株)': 'VOL'  })#各列名を所望の列名に変更する。
+
+        #print("dfstoday")
+        #print(dfstoday)
+
         dfstoday['DATE0'] = '20' + dfstoday['DATE0']  
         dfstoday['DATE'] = pd.to_datetime(dfstoday['DATE0'], format='%Y/%m/%d')
         dfstoday =  dfstoday.loc[:,['OPEN','HIGH','LOW','CLOSE','VOL','DATE']]
@@ -76,6 +142,10 @@ class StockGet(StockGetTop):
 
         #前日から20日前までに株価情報 と 本日の株価情報を結合する
         dfs20 = pd.concat([dfs20,  dfstoday], join='outer') #df0とdf1を和結合させる。
+
+        #print("dfs20")
+        #print(dfs20)
+      
         return dfs20
 
 
@@ -92,7 +162,14 @@ class StockGet(StockGetTop):
 
         snum=stocknum +".T" if str(stocknum).isnumeric()==True else stocknum 
 
-        df=web.DataReader(snum ,'yahoo',start,end) #株価データを取得する。
+
+        #df=web.DataReader(snum ,'yahoo',start,end) #株価データを取得する。2021/7/2から使用できなくなっている
+        df = pdr.get_data_yahoo(snum, start, end)
+
+
+
+
+
 
         df.reset_index('Date',inplace=True)
         df=df.drop(columns='Adj Close') #列Aを削除する。
