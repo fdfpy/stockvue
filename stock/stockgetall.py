@@ -50,7 +50,12 @@ while i < stocknum_db_len:
 
 
     try:
+        
+            #if str(stocknum_db.iloc[i]['STOCK_NUM']).isnumeric()==True: #米国株取得不可回避コード
+            #print(stocknum_db.iloc[i]['STOCK_NUM'])
         controller.process.allproc(stocknum_db.iloc[i]['STOCK_NUM'],i,stocknum_db_len) #stocknum_db.iloc[i]['STOCK_NUM'].item()はnumpy.int64をintに変更する
+        #else:
+            #pass    
     except Exception as e:
 
         with open(setting.ERRFILE_PATH, mode='a') as f:

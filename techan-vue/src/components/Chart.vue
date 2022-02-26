@@ -31,7 +31,7 @@
 
         <div class="float_test300">
           <p> <font size="2.5" color="red" face="Meiryo"> 売買指標  </font> </p>
-          <p> <font size="2" color="#000000" face="Meiryo"> SAR(パラボリック) : {{get_meigara[12]}}</font> </p>
+          <p> <font size="2" color="#000000" face="Meiryo"> 転換線 : {{get_meigara[6]}}</font> </p>
           <p> <font size="2" color="#000000" face="Meiryo"> {{Math.round(100*(1-this.confval.confval0))}}%下限値  : {{this.kagenchi.kagenchi0}} (下落値:{{Math.round(get_meigara[1] - this.kagenchi.kagenchi0)}}) R2:{{Math.round(100*this.coeff.coeff0)/100 }}  </font></p>
           <p> <font size="2" color="#000000" face="Meiryo"> {{Math.round(100*(1-this.confval.confval1))}}%下限値 : {{this.kagenchi.kagenchi1}} (下落値:{{Math.round(get_meigara[1] -this.kagenchi.kagenchi1)}}) R2:{{Math.round(100*this.coeff.coeff1)/100 }}</font></p>
           <p> <font size="2" color="#000000" face="Meiryo"> {{Math.round(100*(1-this.confval.confval2))}}%下限値 : {{this.kagenchi.kagenchi2}}  (下落値:{{Math.round(get_meigara[1] -this.kagenchi.kagenchi2)}}) R2:{{Math.round(100*this.coeff.coeff2)/100 }}</font></p>  
@@ -220,7 +220,7 @@ export default {
       //****  (1-1) グラフの表示画面の大きさを定義している。 *******
  
       var dim = {
-        width: 960+300, height: 500+50+5*2+((5+65)+5)*2,
+        width: 960+300, height: 500+50+5*2+((5+65)+5)*2-300, //x軸の表示場所を変更したい場合、heightを調整する。
         margin: { top: 25+50, right: 50, bottom: 30, left: 50 },
         ohlc: { height: 305 },
         indicator: { height: 65, padding: 5+5 }
@@ -241,7 +241,7 @@ export default {
       //indicatorTop1(0)=indicatorTop(1)    indicatorTop1(1)=dim.indicator.bottom1
    
       var datlength=consts.DATLENGTH; //描写する対象の日数を設定する 
-      var meigara_name=consts.MEIGARA_NAME; //銘柄名を設定する。
+      var meigara_name=""; //銘柄名を設定する。
       //##################################################################
       //################# (2)ヘルパー関数の定義をする。######################
       //##################################################################
@@ -267,6 +267,7 @@ export default {
             .format(d3.timeFormat('%Y-%m-%d'))
             .width(65)
             .translate([0, dim.plot.height]);
+ 
       var ohlcAnnotation = techan.plot.axisannotation()   //y軸のプロパティーを定めるヘルパー関数
             .axis(yAxis)
             .orient('right')
@@ -416,7 +417,7 @@ export default {
         )
   
        //(4-2-4)ろうそく足にカーソルを重ねたときに、日にちと終値を表示させる。
-        dataput(data);
+       // dataput(data);
 
 
         //(4-2-5)トレンドラインを引く
@@ -438,10 +439,10 @@ export default {
             s_period,m_period,l_period,
             bol_n,
             tenkan_delay,kijyun_delay,chikou_delay,senkou1,senkou2_p,senkou2_f,
-            dom1,title1,
-            dom2,title2,period0,period1,
-            dom3,title3,period2,
-            dom4,title4,period3,
+            //dom1,title1, //第2表示エリアの表示非表示を切り替える。
+            //dom2,title2,period0,period1, //第3表示エリアの表示非表示を切り替える。
+            //dom3,title3,period2,     //第4表示エリアの表示非表示を切り替える。
+            //dom4,title4,period3,   //第5表示エリアの表示非表示を切り替える。
           )
           
             {
@@ -467,7 +468,7 @@ export default {
               //console.log(variation_dat)
               //前日の株価との変化率時系列を描写している
               //indicatorTop(0)=dim.indicator.top    indicatorTop(1)=dim.indicator.bottom
-              draw.get_seriesline(variation_dat[0],x0,x1,indicatorTop(0)+dim.indicator.height,indicatorTop(0),dom1,title1)
+              //draw.get_seriesline(variation_dat[0],x0,x1,indicatorTop(0)+dim.indicator.height,indicatorTop(0),dom1,title1)
               //*********************************************************************************   
               //******************** (4-5) 第3エリアに描写を行う。 *********************************
               // **(選択1) close値-open値の移動平均値,close値(本日)-close値(昨日)の移動平均値の描写を行うコード
@@ -488,7 +489,7 @@ export default {
               var val2_dat = tech.val_get(data,0)[1]
               //console.log("val2_dat")
               //console.log(val2_dat)
-              draw.get_barline_sma(val2_dat,x0,x1,indicatorTop(1)+dim.indicator.height, indicatorTop(1),barchart_property,dom2,title2,consts.VAL2_SMA+1)
+              //draw.get_barline_sma(val2_dat,x0,x1,indicatorTop(1)+dim.indicator.height, indicatorTop(1),barchart_property,dom2,title2,consts.VAL2_SMA+1)
               //******************************************************************************************   
               //******************** (4-6) 第4エリアに描写を行う。 
               //*** (移動平均,ボリンジャー表示) 株価と移動平均線乖離の棒グラフを表示する****
@@ -510,19 +511,19 @@ export default {
               //axis_right : DOM名 x軸(右側)
               //axis_left :  DOM名 y軸(左側)
               //title : グラフのタイトル
-              if(this.type==2){
-                //もみ合い判定結果を表示する。
-                 draw.get_barline_sma(momiai_hantei,x0,x1,indicatorTop1(1)+dim.indicator.height, indicatorTop1(1),barchart_property,dom3,title3,consts.MOMIAI+consts.KIJYUN_DELAY)
-              } else {
-                //株価と移動平均線乖離の棒グラフを表示する
-                 draw.get_barline_sma(sma_kairi_val,x0,x1,indicatorTop1(1)+dim.indicator.height, indicatorTop1(1),barchart_property,dom3,title3,consts.M_PERIOD)
-              }
+              // if(this.type==2){
+              //   //もみ合い判定結果を表示する。
+              //    draw.get_barline_sma(momiai_hantei,x0,x1,indicatorTop1(1)+dim.indicator.height, indicatorTop1(1),barchart_property,dom3,title3,consts.MOMIAI+consts.KIJYUN_DELAY)
+              // } else {
+              //   //株価と移動平均線乖離の棒グラフを表示する
+              //    draw.get_barline_sma(sma_kairi_val,x0,x1,indicatorTop1(1)+dim.indicator.height, indicatorTop1(1),barchart_property,dom3,title3,consts.M_PERIOD)
+              // }
                //*********************************************************************************   
                //******************** (4-6) 第5エリアに描写を行う。 *************************************
                //*********************************************************************************  
                //PER時系列を描写している
-               var per_series = tech.get_per(data,period3)
-               draw.getper_seriesline(per_series,x0,x1,indicatorTop2(1)+dim.indicator.height,indicatorTop2(1),dom4,title4,period3)
+               //var per_series = tech.get_per(data,period3)
+               //draw.getper_seriesline(per_series,x0,x1,indicatorTop2(1)+dim.indicator.height,indicatorTop2(1),dom4,title4,period3)
             }
         }
       //**********************************************************//
@@ -681,112 +682,112 @@ export default {
           // yaxis_max : yデータを描写する座標終了値 
           //dom1 :  DOM名 x軸(右側)  描写エリアの指定名
           //title : グラフのタイトル
-          get_seriesline(datsbox,x0,x1,yaxis_min,yaxis_max,dom1,title)  {
-            var dats = datsbox.variation
-            var average = datsbox.average
-            var sigma = datsbox.sigma
-            //min_val:描写するデータ系列の最小値 , max_val:描写するデータ系列の最大値
-            var max_val=d3.max(dats, function(d) { return d.val; })
-            var min_val=d3.min(dats, function(d) { return d.val; })
-            //*** 第2描写エリア右軸の設定をしている。*******
-            indicatorSelection.append("g")
-                    .attr("class", "axis right")
-                    .attr("transform", "translate(" + x1 + ",0)");//x(0)=0,  x(1)=dim.plot.width  x(1) -> x1
+          // get_seriesline(datsbox,x0,x1,yaxis_min,yaxis_max,dom1,title)  {
+          //   var dats = datsbox.variation
+          //   var average = datsbox.average
+          //   var sigma = datsbox.sigma
+          //   //min_val:描写するデータ系列の最小値 , max_val:描写するデータ系列の最大値
+          //   var max_val=d3.max(dats, function(d) { return d.val; })
+          //   var min_val=d3.min(dats, function(d) { return d.val; })
+          //   //*** 第2描写エリア右軸の設定をしている。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "axis right")
+          //           .attr("transform", "translate(" + x1 + ",0)");//x(0)=0,  x(1)=dim.plot.width  x(1) -> x1
         
-            //*** 第2描写エリア左軸の設定をしている。*******
-            indicatorSelection.append("g")
-                    .attr("class", "axis left")
-                    .attr("transform", "translate(" + x0 + ",0)")   //x(0) ->x0
-            //*** 第2描写エリアのデータを表示する場所を設定している。*******
-            indicatorSelection.append("g")
-                    .attr("class", "indicator-plot")
-                    .attr("transform", "translate(0,0)");
-            //yaxis_min=indicatorTop(0)+dim.indicator.height,    yaxis_max=indicatorTop(0)
-              //軸位置の設定,軸の数値範囲の設定を行うヘルパー関数を定義している    //indicatorTop(0)=dim.indicator.top , 
-            var n_axisScale = d3.scaleLinear().domain([min_val,max_val]).range([yaxis_min, yaxis_max]);
-              //第2描写エリア 右軸の描写設定をしている。
-            var n_AxisRight = d3.axisRight(n_axisScale).ticks(5);
-              //第2描写エリア 左軸の描写設定をしている。
-            var n_AxisLeft = d3.axisLeft(n_axisScale).ticks(5);
-              //第2描写エリア 右軸の描写を行う。
-            svg.select(dom1 + " .axis.right").call(n_AxisRight); 
-              //第2描写エリア 左軸の描写を行う。
-            svg.select(dom1 + " .axis.left").call(n_AxisLeft); 
-              //yデータをプロットするy座標に変換する関数
-            var y2 = d3.scaleLinear().domain([min_val, max_val]).range([yaxis_min, yaxis_max]);
-            // average + i*sigma値 に該当するラインを引くためのデータを準備する
-            var criteria_u=[       
-                [{date: dats[0].date , board : average+sigma},{date: dats[dats.length-1].date , board : average+sigma}],
-                [{date: dats[0].date , board : average+2*sigma},{date: dats[dats.length-1].date , board :  average+2*sigma}],
-                [{date: dats[0].date , board : average+3*sigma},{date: dats[dats.length-1].date , board :  average+3*sigma}],
-              ]
-            // average - i*sigma値 に該当するラインを引くためのデータを準備する
-            var criteria_d=[       
-                [{date: dats[0].date , board : average-sigma},{date: dats[dats.length-1].date , board : average-sigma}],
-                [{date: dats[0].date , board : average-2*sigma},{date: dats[dats.length-1].date , board :  average-2*sigma}],
-                [{date: dats[0].date , board : average-3*sigma},{date: dats[dats.length-1].date , board :  average-3*sigma}],
-              ]
-            // ラインを生成するhtmlを生成するためのヘルパー関数を定義する。
-            var criteria_line = d3.line()    
-                    .x(function(d) { return x(d.date); })
-                    .y(function(d) { return y2(d.board); });
-            // average + i*sigma値 に該当するラインを描写する。
-            criteria_u.forEach( criteria => {
-                svg.select(dom1+" .indicator-plot").append("path")　
-                    .datum(criteria)
-                    .attr("class", "lineblack")
-                    .attr("d",criteria_line)
-              })
-            // average - i*sigma値 に該当するラインを描写する。
-            criteria_d.forEach( criteria => {
-                svg.select(dom1+" .indicator-plot").append("path")　
-                    .datum(criteria)
-                    .attr("class", "lineblackdash")
-                    .attr("d",criteria_line)
-              })
-            // 株価の前日との変化率時系列ラインを描写するためのヘルパー関数
-            var variationline = d3.line()    
-                    .x(function(d) { return x(d.date); })
-                    .y(function(d) { return y2(d.val); });
-            // 株価の前日との変化率時系列ラインを描写する
-            svg.select(dom1+" .indicator-plot").append("path")　
-                    .datum(dats)
-                    .attr("class", "lineorange")
-                    .attr("d",variationline)
-            // 株価の前日との変化率値を黒丸で表現している。
-            svg.select(dom1+" .indicator-plot").append("g")
-                    .selectAll("circle")
-                    .data(dats)
-                    .enter()
-                    .append("circle")
-                    .attr("cx", function(d) { return x(d.date); })
-                    .attr("cy", function(d) { return y2(d.val); })
-                    .attr("fill", "black")
-                    .attr("r", 1);
-            // "ave + 3*sigma　の文字を描写する"
-            svg.select(dom1+" .indicator-plot").append("g")
-                  // .attr("transform", "translate(" + x1 + ",0)")
-                    .append("text")
-                    .style("font-size", 8)
-                    .attr("x", x1-100)            
-                    .attr("y", y2(criteria_u[2][1].board)-2)
-                    .text("ave+" + 3 + "sigma");
-            // "ave - 3*sigma　の文字を描写する"
-            svg.select(dom1+" .indicator-plot").append("g")
-                  // .attr("transform", "translate(" + x1 + ",0)")
-                    .append("text")
-                    .style("font-size", 8)
-                    .attr("x", x1-100)            
-                    .attr("y", y2(criteria_d[2][1].board)+7)
-                    .text("ave-" + 3 + "sigma");
-            svg.select(dom1+" .indicator-plot").append("g")
-                  // .attr("transform", "translate(" + x1 + ",0)")
-                    .append("text")
-                    .attr("class", "symbol")
-                    .attr("x", x0)            
-                    .attr("y", yaxis_max)
-                    .text(title);
-          }
+          //   //*** 第2描写エリア左軸の設定をしている。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "axis left")
+          //           .attr("transform", "translate(" + x0 + ",0)")   //x(0) ->x0
+          //   //*** 第2描写エリアのデータを表示する場所を設定している。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "indicator-plot")
+          //           .attr("transform", "translate(0,0)");
+          //   //yaxis_min=indicatorTop(0)+dim.indicator.height,    yaxis_max=indicatorTop(0)
+          //     //軸位置の設定,軸の数値範囲の設定を行うヘルパー関数を定義している    //indicatorTop(0)=dim.indicator.top , 
+          //   var n_axisScale = d3.scaleLinear().domain([min_val,max_val]).range([yaxis_min, yaxis_max]);
+          //     //第2描写エリア 右軸の描写設定をしている。
+          //   var n_AxisRight = d3.axisRight(n_axisScale).ticks(5);
+          //     //第2描写エリア 左軸の描写設定をしている。
+          //   var n_AxisLeft = d3.axisLeft(n_axisScale).ticks(5);
+          //     //第2描写エリア 右軸の描写を行う。
+          //   svg.select(dom1 + " .axis.right").call(n_AxisRight); 
+          //     //第2描写エリア 左軸の描写を行う。
+          //   svg.select(dom1 + " .axis.left").call(n_AxisLeft); 
+          //     //yデータをプロットするy座標に変換する関数
+          //   var y2 = d3.scaleLinear().domain([min_val, max_val]).range([yaxis_min, yaxis_max]);
+          //   // average + i*sigma値 に該当するラインを引くためのデータを準備する
+          //   var criteria_u=[       
+          //       [{date: dats[0].date , board : average+sigma},{date: dats[dats.length-1].date , board : average+sigma}],
+          //       [{date: dats[0].date , board : average+2*sigma},{date: dats[dats.length-1].date , board :  average+2*sigma}],
+          //       [{date: dats[0].date , board : average+3*sigma},{date: dats[dats.length-1].date , board :  average+3*sigma}],
+          //     ]
+          //   // average - i*sigma値 に該当するラインを引くためのデータを準備する
+          //   var criteria_d=[       
+          //       [{date: dats[0].date , board : average-sigma},{date: dats[dats.length-1].date , board : average-sigma}],
+          //       [{date: dats[0].date , board : average-2*sigma},{date: dats[dats.length-1].date , board :  average-2*sigma}],
+          //       [{date: dats[0].date , board : average-3*sigma},{date: dats[dats.length-1].date , board :  average-3*sigma}],
+          //     ]
+          //   // ラインを生成するhtmlを生成するためのヘルパー関数を定義する。
+          //   var criteria_line = d3.line()    
+          //           .x(function(d) { return x(d.date); })
+          //           .y(function(d) { return y2(d.board); });
+          //   // average + i*sigma値 に該当するラインを描写する。
+          //   criteria_u.forEach( criteria => {
+          //       svg.select(dom1+" .indicator-plot").append("path")　
+          //           .datum(criteria)
+          //           .attr("class", "lineblack")
+          //           .attr("d",criteria_line)
+          //     })
+          //   // average - i*sigma値 に該当するラインを描写する。
+          //   criteria_d.forEach( criteria => {
+          //       svg.select(dom1+" .indicator-plot").append("path")　
+          //           .datum(criteria)
+          //           .attr("class", "lineblackdash")
+          //           .attr("d",criteria_line)
+          //     })
+          //   // 株価の前日との変化率時系列ラインを描写するためのヘルパー関数
+          //   var variationline = d3.line()    
+          //           .x(function(d) { return x(d.date); })
+          //           .y(function(d) { return y2(d.val); });
+          //   // 株価の前日との変化率時系列ラインを描写する
+          //   svg.select(dom1+" .indicator-plot").append("path")　
+          //           .datum(dats)
+          //           .attr("class", "lineorange")
+          //           .attr("d",variationline)
+          //   // 株価の前日との変化率値を黒丸で表現している。
+          //   svg.select(dom1+" .indicator-plot").append("g")
+          //           .selectAll("circle")
+          //           .data(dats)
+          //           .enter()
+          //           .append("circle")
+          //           .attr("cx", function(d) { return x(d.date); })
+          //           .attr("cy", function(d) { return y2(d.val); })
+          //           .attr("fill", "black")
+          //           .attr("r", 1);
+          //   // "ave + 3*sigma　の文字を描写する"
+          //   svg.select(dom1+" .indicator-plot").append("g")
+          //         // .attr("transform", "translate(" + x1 + ",0)")
+          //           .append("text")
+          //           .style("font-size", 8)
+          //           .attr("x", x1-100)            
+          //           .attr("y", y2(criteria_u[2][1].board)-2)
+          //           .text("ave+" + 3 + "sigma");
+          //   // "ave - 3*sigma　の文字を描写する"
+          //   svg.select(dom1+" .indicator-plot").append("g")
+          //         // .attr("transform", "translate(" + x1 + ",0)")
+          //           .append("text")
+          //           .style("font-size", 8)
+          //           .attr("x", x1-100)            
+          //           .attr("y", y2(criteria_d[2][1].board)+7)
+          //           .text("ave-" + 3 + "sigma");
+          //   svg.select(dom1+" .indicator-plot").append("g")
+          //         // .attr("transform", "translate(" + x1 + ",0)")
+          //           .append("text")
+          //           .attr("class", "symbol")
+          //           .attr("x", x0)            
+          //           .attr("y", yaxis_max)
+          //           .text(title);
+          // }
           //*********************************************************
           // (3-7)  PERの時系列を算出し、描写する関数(@第2,第3,第4,・・・に描写する関数)
           //*********************************************************
@@ -798,92 +799,92 @@ export default {
           // yaxis_max : yデータを描写する座標終了値 
           //dom1 :  DOM名 x軸(右側)  描写エリアの指定名
           //title : グラフのタイトル
-          getper_seriesline(datsbox,x0,x1,yaxis_min,yaxis_max,dom1,title){
-            var dats = datsbox
-            //min_val:描写するデータ系列の最小値 , max_val:描写するデータ系列の最大値
-            var max_val=d3.max(dats, function(d) { return d.val; })
-            var min_val=d3.min(dats, function(d) { return d.val; })
-            //*** 第2描写エリア右軸の設定をしている。*******
-            indicatorSelection.append("g")
-                    .attr("class", "axis right")
-                    .attr("transform", "translate(" + x1 + ",0)");//x(0)=0,  x(1)=dim.plot.width  x(1) -> x1
+          // getper_seriesline(datsbox,x0,x1,yaxis_min,yaxis_max,dom1,title){
+          //   var dats = datsbox
+          //   //min_val:描写するデータ系列の最小値 , max_val:描写するデータ系列の最大値
+          //   var max_val=d3.max(dats, function(d) { return d.val; })
+          //   var min_val=d3.min(dats, function(d) { return d.val; })
+          //   //*** 第2描写エリア右軸の設定をしている。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "axis right")
+          //           .attr("transform", "translate(" + x1 + ",0)");//x(0)=0,  x(1)=dim.plot.width  x(1) -> x1
         
-            //*** 第2描写エリア左軸の設定をしている。*******
-            indicatorSelection.append("g")
-                    .attr("class", "axis left")
-                    .attr("transform", "translate(" + x0 + ",0)")   //x(0) ->x0
-            //*** 第2描写エリアのデータを表示する場所を設定している。*******
-            indicatorSelection.append("g")
-                    .attr("class", "indicator-plot")
-                    .attr("transform", "translate(0,0)");
-            //yaxis_min=indicatorTop(0)+dim.indicator.height,    yaxis_max=indicatorTop(0)
-              //軸位置の設定,軸の数値範囲の設定を行うヘルパー関数を定義している    //indicatorTop(0)=dim.indicator.top , 
-            var n_axisScale = d3.scaleLinear().domain([min_val,max_val]).range([yaxis_min, yaxis_max]);
-              //第2描写エリア 右軸の描写設定をしている。
-            var n_AxisRight = d3.axisRight(n_axisScale).ticks(5);
-              //第2描写エリア 左軸の描写設定をしている。
-            var n_AxisLeft = d3.axisLeft(n_axisScale).ticks(5);
-              //第2描写エリア 右軸の描写を行う。
-            svg.select(dom1 + " .axis.right").call(n_AxisRight); 
-              //第2描写エリア 左軸の描写を行う。
-            svg.select(dom1 + " .axis.left").call(n_AxisLeft); 
-              //yデータをプロットするy座標に変換する関数
-            var y2 = d3.scaleLinear().domain([min_val, max_val]).range([yaxis_min, yaxis_max]);
-            // PER(MIN)～PER(MAX)までを4分割した線を引くために、データを準備する
-            var dw = (max_val-min_val)/4
-            var criteria_u=[       
-                [{date: dats[0].date , board : min_val},{date: dats[dats.length-1].date , board : min_val}],
-                [{date: dats[0].date , board : min_val+dw},{date: dats[dats.length-1].date , board :  min_val+dw}],
-                [{date: dats[0].date , board : min_val+2*dw},{date: dats[dats.length-1].date , board : min_val+2*dw}],
-                [{date: dats[0].date , board : min_val+3*dw},{date: dats[dats.length-1].date , board : min_val+3*dw}],
-                [{date: dats[0].date , board : max_val},{date: dats[dats.length-1].date , board : max_val}]       
-              ]
-            // ラインを生成するhtmlを生成するためのヘルパー関数を定義する。
-            var criteria_line = d3.line()    
-                    .x(function(d) { return x(d.date); })
-                    .y(function(d) { return y2(d.board); });
-            // average + i*sigma値 に該当するラインを描写する。
-            criteria_u.forEach( criteria => {
-                svg.select(dom1+" .indicator-plot").append("path")　
-                    .datum(criteria)
-                    .attr("class", "lineblackdash")
-                    .attr("d",criteria_line)
-              })
-            // // average - i*sigma値 に該当するラインを描写する。
-            // criteria_d.forEach( criteria => {
-            //     svg.select(dom1+" .indicator-plot").append("path")　
-            //         .datum(criteria)
-            //         .attr("class", "lineblackdash")
-            //         .attr("d",criteria_line)
-            //    })
-            // 株価の前日との変化率時系列ラインを描写するためのヘルパー関数
-            var variationline = d3.line()    
-                    .x(function(d) { return x(d.date); })
-                    .y(function(d) { return y2(d.val); });
-            // 株価の前日との変化率時系列ラインを描写する
-            svg.select(dom1+" .indicator-plot").append("path")　
-                    .datum(dats)
-                    .attr("class", "lineorange")
-                    .attr("d",variationline)
-            // 株価の前日との変化率値を黒丸で表現している。
-            svg.select(dom1+" .indicator-plot").append("g")
-                    .selectAll("circle")
-                    .data(dats)
-                    .enter()
-                    .append("circle")
-                    .attr("cx", function(d) { return x(d.date); })
-                    .attr("cy", function(d) { return y2(d.val); })
-                    .attr("fill", "black")
-                    .attr("r", 1);
-            //グラフのタイトルを描写する関数
-            svg.select(dom1+" .indicator-plot").append("g")
-                  // .attr("transform", "translate(" + x1 + ",0)")
-                    .append("text")
-                    .attr("class", "symbol")
-                    .attr("x", x0)            
-                    .attr("y", yaxis_max)
-                    .text(title);
-          }
+          //   //*** 第2描写エリア左軸の設定をしている。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "axis left")
+          //           .attr("transform", "translate(" + x0 + ",0)")   //x(0) ->x0
+          //   //*** 第2描写エリアのデータを表示する場所を設定している。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "indicator-plot")
+          //           .attr("transform", "translate(0,0)");
+          //   //yaxis_min=indicatorTop(0)+dim.indicator.height,    yaxis_max=indicatorTop(0)
+          //     //軸位置の設定,軸の数値範囲の設定を行うヘルパー関数を定義している    //indicatorTop(0)=dim.indicator.top , 
+          //   var n_axisScale = d3.scaleLinear().domain([min_val,max_val]).range([yaxis_min, yaxis_max]);
+          //     //第2描写エリア 右軸の描写設定をしている。
+          //   var n_AxisRight = d3.axisRight(n_axisScale).ticks(5);
+          //     //第2描写エリア 左軸の描写設定をしている。
+          //   var n_AxisLeft = d3.axisLeft(n_axisScale).ticks(5);
+          //     //第2描写エリア 右軸の描写を行う。
+          //   svg.select(dom1 + " .axis.right").call(n_AxisRight); 
+          //     //第2描写エリア 左軸の描写を行う。
+          //   svg.select(dom1 + " .axis.left").call(n_AxisLeft); 
+          //     //yデータをプロットするy座標に変換する関数
+          //   var y2 = d3.scaleLinear().domain([min_val, max_val]).range([yaxis_min, yaxis_max]);
+          //   // PER(MIN)～PER(MAX)までを4分割した線を引くために、データを準備する
+          //   var dw = (max_val-min_val)/4
+          //   var criteria_u=[       
+          //       [{date: dats[0].date , board : min_val},{date: dats[dats.length-1].date , board : min_val}],
+          //       [{date: dats[0].date , board : min_val+dw},{date: dats[dats.length-1].date , board :  min_val+dw}],
+          //       [{date: dats[0].date , board : min_val+2*dw},{date: dats[dats.length-1].date , board : min_val+2*dw}],
+          //       [{date: dats[0].date , board : min_val+3*dw},{date: dats[dats.length-1].date , board : min_val+3*dw}],
+          //       [{date: dats[0].date , board : max_val},{date: dats[dats.length-1].date , board : max_val}]       
+          //     ]
+          //   // ラインを生成するhtmlを生成するためのヘルパー関数を定義する。
+          //   var criteria_line = d3.line()    
+          //           .x(function(d) { return x(d.date); })
+          //           .y(function(d) { return y2(d.board); });
+          //   // average + i*sigma値 に該当するラインを描写する。
+          //   criteria_u.forEach( criteria => {
+          //       svg.select(dom1+" .indicator-plot").append("path")　
+          //           .datum(criteria)
+          //           .attr("class", "lineblackdash")
+          //           .attr("d",criteria_line)
+          //     })
+          //   // // average - i*sigma値 に該当するラインを描写する。
+          //   // criteria_d.forEach( criteria => {
+          //   //     svg.select(dom1+" .indicator-plot").append("path")　
+          //   //         .datum(criteria)
+          //   //         .attr("class", "lineblackdash")
+          //   //         .attr("d",criteria_line)
+          //   //    })
+          //   // 株価の前日との変化率時系列ラインを描写するためのヘルパー関数
+          //   var variationline = d3.line()    
+          //           .x(function(d) { return x(d.date); })
+          //           .y(function(d) { return y2(d.val); });
+          //   // 株価の前日との変化率時系列ラインを描写する
+          //   svg.select(dom1+" .indicator-plot").append("path")　
+          //           .datum(dats)
+          //           .attr("class", "lineorange")
+          //           .attr("d",variationline)
+          //   // 株価の前日との変化率値を黒丸で表現している。
+          //   svg.select(dom1+" .indicator-plot").append("g")
+          //           .selectAll("circle")
+          //           .data(dats)
+          //           .enter()
+          //           .append("circle")
+          //           .attr("cx", function(d) { return x(d.date); })
+          //           .attr("cy", function(d) { return y2(d.val); })
+          //           .attr("fill", "black")
+          //           .attr("r", 1);
+          //   //グラフのタイトルを描写する関数
+          //   svg.select(dom1+" .indicator-plot").append("g")
+          //         // .attr("transform", "translate(" + x1 + ",0)")
+          //           .append("text")
+          //           .attr("class", "symbol")
+          //           .attr("x", x0)            
+          //           .attr("y", yaxis_max)
+          //           .text(title);
+          // }
           //*********************************************************
           // (3-6)  棒グラフを表示する関数(@第2,第3,第4,・・・に描写する関数)
           //*********************************************************
@@ -898,91 +899,91 @@ export default {
           // dom1 : DOM名 x軸(右側)  描写エリアの指定名
           // title : グラフのタイトル
           // period : 棒グラフ表示を開始する場所を指定する。
-          get_barline_sma(datsbox0,x0,x1,yaxis_min, yaxis_max,barchart_property,dom1,title,period){
-            var dats = datsbox0
-            //var average = datsbox.average
-            //var sigma = datsbox.sigma
-            //console.log("dats")
-            //console.log(dats)
-            //console.log("barchart_property")
-            //console.log(barchart_property)
-            //min_val:描写するデータ系列の最小値 , max_val:描写するデータ系列の最大値
-            var max_val=d3.max(dats, function(d) { return d.val; })
-            var min_val=d3.min(dats, function(d) { return d.val; })
-            //*** 描写エリア右軸の設定をしている。*******
-            indicatorSelection.append("g")
-                    .attr("class", "axis right")
-                    .attr("transform", "translate(" + x1 + ",0)");//x(0)=0,  x(1)=dim.plot.width  x(1) -> x1
+          // get_barline_sma(datsbox0,x0,x1,yaxis_min, yaxis_max,barchart_property,dom1,title,period){
+          //   var dats = datsbox0
+          //   //var average = datsbox.average
+          //   //var sigma = datsbox.sigma
+          //   //console.log("dats")
+          //   //console.log(dats)
+          //   //console.log("barchart_property")
+          //   //console.log(barchart_property)
+          //   //min_val:描写するデータ系列の最小値 , max_val:描写するデータ系列の最大値
+          //   var max_val=d3.max(dats, function(d) { return d.val; })
+          //   var min_val=d3.min(dats, function(d) { return d.val; })
+          //   //*** 描写エリア右軸の設定をしている。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "axis right")
+          //           .attr("transform", "translate(" + x1 + ",0)");//x(0)=0,  x(1)=dim.plot.width  x(1) -> x1
         
-            //*** 描写エリア左軸の設定をしている。*******
-            indicatorSelection.append("g")
-                    .attr("class", "axis left")
-                    .attr("transform", "translate(" + x0 + ",0)")   //x(0) ->x0
-            //*** 描写エリアのデータを表示する場所を設定している。*******
-            indicatorSelection.append("g")
-                    .attr("class", "indicator-plot")
-                    .attr("transform", "translate(0,0)");
-            //yaxis_min=indicatorTop(0)+dim.indicator.height,    yaxis_max=indicatorTop(0)
-              //軸位置の設定,軸の数値範囲の設定を行うヘルパー関数を定義している    //indicatorTop(0)=dim.indicator.top , 
-              var n_axisScale = d3.scaleLinear().domain([min_val,max_val]).range([yaxis_min, yaxis_max]);
-              //描写エリア 右軸の描写設定をしている。
-              var n_AxisRight = d3.axisRight(n_axisScale).ticks(5);
-              //描写エリア 左軸の描写設定をしている。
-              var n_AxisLeft = d3.axisLeft(n_axisScale).ticks(5);
-              //描写エリア 右軸の描写を行う。
-              svg.select(dom1 + " .axis.right").call(n_AxisRight); 
-              //描写エリア 左軸の描写を行う。
-              svg.select(dom1 + " .axis.left").call(n_AxisLeft); 
-              //yデータをプロットするy座標に変換する関数
-              var y2 = d3.scaleLinear().domain([min_val, max_val]).range([yaxis_min, yaxis_max]);
-              var delta0=barchart_property[0]
-              var delta1=barchart_property[1]
-              var dw=barchart_property[2]            
-            //棒グラフ作成のためのデータを生成する関数。
-              var datagenarate_bar=function(dats,delta0,delta1,dw){
-              var bulk=[];
-              dats.forEach(function(dat,i){
-              var xp = function(i) { return delta0+i*(dw+delta1) }
-              var yp = function(d) { if (y2(d.val) <= y2(0)) return y2(d.val) ; else if(y2(d.val) > y2(0)) return y2(0) }     
-            //棒グラフを作成するパラメータを格納する配列
-              bulk.push({
-                x:xp(i+period-1), 
-                y:yp(dat),
-                width:dw,
-                height:Math.abs(y2(dat.val)-y2(0))
-              })
-              })
-                   //console.log("bulk")             
-                  //console.log(bulk)
-                  return bulk
-              }
-              //棒グラフ作成のためのデータを生成する。
-              var datagenarate_barchart=datagenarate_bar(dats,delta0,delta1,dw)
-            //棒グラフの表示
-              indicatorSelection.append("g")
-                .selectAll("rect")
-                .data(datagenarate_barchart)
-                .enter()
-                .append("rect")
-                .attr("x", function(d) { return d.x; })
-                .attr("y", function(d) { return d.y; })
-                .attr("width", function(d) { return d.width; })
-                .attr("height", function(d) { return d.height; })
-                .attr("fill", "gray");
-              svg.select("g.third_area .indicator-plot").append("g")
-                  // .attr("transform", "translate(" + x1 + ",0)")
-                    .append("text")
-                    .attr("class", "symbol")
-                    .attr("x", x0)            
-                    .attr("y", yaxis_max)
-                    .text(title);
-             var legendVals = ["もみあい"]
-             var iro=['purple']
-             let svgdom = svg;  // 描画svg作成  
-            if(dats[dats.length-1].val==0){
-               this.hanrei_writer_momiai(legendVals,iro,svgdom)
-            }
-          }
+          //   //*** 描写エリア左軸の設定をしている。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "axis left")
+          //           .attr("transform", "translate(" + x0 + ",0)")   //x(0) ->x0
+          //   //*** 描写エリアのデータを表示する場所を設定している。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "indicator-plot")
+          //           .attr("transform", "translate(0,0)");
+          //   //yaxis_min=indicatorTop(0)+dim.indicator.height,    yaxis_max=indicatorTop(0)
+          //     //軸位置の設定,軸の数値範囲の設定を行うヘルパー関数を定義している    //indicatorTop(0)=dim.indicator.top , 
+          //     var n_axisScale = d3.scaleLinear().domain([min_val,max_val]).range([yaxis_min, yaxis_max]);
+          //     //描写エリア 右軸の描写設定をしている。
+          //     var n_AxisRight = d3.axisRight(n_axisScale).ticks(5);
+          //     //描写エリア 左軸の描写設定をしている。
+          //     var n_AxisLeft = d3.axisLeft(n_axisScale).ticks(5);
+          //     //描写エリア 右軸の描写を行う。
+          //     svg.select(dom1 + " .axis.right").call(n_AxisRight); 
+          //     //描写エリア 左軸の描写を行う。
+          //     svg.select(dom1 + " .axis.left").call(n_AxisLeft); 
+          //     //yデータをプロットするy座標に変換する関数
+          //     var y2 = d3.scaleLinear().domain([min_val, max_val]).range([yaxis_min, yaxis_max]);
+          //     var delta0=barchart_property[0]
+          //     var delta1=barchart_property[1]
+          //     var dw=barchart_property[2]            
+          //   //棒グラフ作成のためのデータを生成する関数。
+          //     var datagenarate_bar=function(dats,delta0,delta1,dw){
+          //     var bulk=[];
+          //     dats.forEach(function(dat,i){
+          //     var xp = function(i) { return delta0+i*(dw+delta1) }
+          //     var yp = function(d) { if (y2(d.val) <= y2(0)) return y2(d.val) ; else if(y2(d.val) > y2(0)) return y2(0) }     
+          //   //棒グラフを作成するパラメータを格納する配列
+          //     bulk.push({
+          //       x:xp(i+period-1), 
+          //       y:yp(dat),
+          //       width:dw,
+          //       height:Math.abs(y2(dat.val)-y2(0))
+          //     })
+          //     })
+          //          //console.log("bulk")             
+          //         //console.log(bulk)
+          //         return bulk
+          //     }
+          //     //棒グラフ作成のためのデータを生成する。
+          //     var datagenarate_barchart=datagenarate_bar(dats,delta0,delta1,dw)
+          //   //棒グラフの表示
+          //     indicatorSelection.append("g")
+          //       .selectAll("rect")
+          //       .data(datagenarate_barchart)
+          //       .enter()
+          //       .append("rect")
+          //       .attr("x", function(d) { return d.x; })
+          //       .attr("y", function(d) { return d.y; })
+          //       .attr("width", function(d) { return d.width; })
+          //       .attr("height", function(d) { return d.height; })
+          //       .attr("fill", "gray");
+          //     svg.select("g.third_area .indicator-plot").append("g")
+          //         // .attr("transform", "translate(" + x1 + ",0)")
+          //           .append("text")
+          //           .attr("class", "symbol")
+          //           .attr("x", x0)            
+          //           .attr("y", yaxis_max)
+          //           .text(title);
+          //    var legendVals = ["もみあい"]
+          //    var iro=['purple']
+          //    let svgdom = svg;  // 描画svg作成  
+          //   //if(dats[dats.length-1].val==0){
+          //     // this.hanrei_writer_momiai(legendVals,iro,svgdom)
+          //   //}
+          // }
           //*********************************************************
           // (3-6)  棒グラフを表示する関数(@第2,第3,第4,・・・に描写する関数)
           //*********************************************************
@@ -999,109 +1000,109 @@ export default {
           // title : グラフのタイトル
           // period0 : datsbox0,棒グラフ表示を開始する場所を指定する。
           // period1 : datsbox1,棒グラフ表示を開始する場所を指定する。
-          get_barline_smad(datsbox0,datsbox1,x0,x1,yaxis_min, yaxis_max,barchart_property,dom1,title,period0,period1){
-            var dats0 = datsbox0
-            var dats1 = datsbox1
-            //console.log("barchart_property")
-            //console.log(barchart_property)
-            //min_val:描写するデータ系列の最小値 , max_val:描写するデータ系列の最大値
-            var max_val0=d3.max(dats0, function(d) { return d.val; })
-            var min_val0=d3.min(dats0, function(d) { return d.val; })
-            var max_val1=d3.max(dats1, function(d) { return d.val; })
-            var min_val1=d3.min(dats1, function(d) { return d.val; })
-            var max_val=d3.max([max_val0,max_val1])
-            var min_val=d3.min([min_val0,min_val1])
-            //*** 描写エリア右軸の設定をしている。*******
-            indicatorSelection.append("g")
-                    .attr("class", "axis right")
-                    .attr("transform", "translate(" + x1 + ",0)");//x(0)=0,  x(1)=dim.plot.width  x(1) -> x1
+          // get_barline_smad(datsbox0,datsbox1,x0,x1,yaxis_min, yaxis_max,barchart_property,dom1,title,period0,period1){
+          //   var dats0 = datsbox0
+          //   var dats1 = datsbox1
+          //   //console.log("barchart_property")
+          //   //console.log(barchart_property)
+          //   //min_val:描写するデータ系列の最小値 , max_val:描写するデータ系列の最大値
+          //   var max_val0=d3.max(dats0, function(d) { return d.val; })
+          //   var min_val0=d3.min(dats0, function(d) { return d.val; })
+          //   var max_val1=d3.max(dats1, function(d) { return d.val; })
+          //   var min_val1=d3.min(dats1, function(d) { return d.val; })
+          //   var max_val=d3.max([max_val0,max_val1])
+          //   var min_val=d3.min([min_val0,min_val1])
+          //   //*** 描写エリア右軸の設定をしている。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "axis right")
+          //           .attr("transform", "translate(" + x1 + ",0)");//x(0)=0,  x(1)=dim.plot.width  x(1) -> x1
         
-            //*** 描写エリア左軸の設定をしている。*******
-            indicatorSelection.append("g")
-                    .attr("class", "axis left")
-                    .attr("transform", "translate(" + x0 + ",0)")   //x(0) ->x0
-            //*** 描写エリアのデータを表示する場所を設定している。*******
-            indicatorSelection.append("g")
-                    .attr("class", "indicator-plot")
-                    .attr("transform", "translate(0,0)");
-            //yaxis_min=indicatorTop(0)+dim.indicator.height,    yaxis_max=indicatorTop(0)
-              //軸位置の設定,軸の数値範囲の設定を行うヘルパー関数を定義している    //indicatorTop(0)=dim.indicator.top , 
-              var n_axisScale = d3.scaleLinear().domain([min_val,max_val]).range([yaxis_min, yaxis_max]);
-              //描写エリア 右軸の描写設定をしている。
-              var n_AxisRight = d3.axisRight(n_axisScale).ticks(5);
-              //描写エリア 左軸の描写設定をしている。
-              var n_AxisLeft = d3.axisLeft(n_axisScale).ticks(5);
-              //描写エリア 右軸の描写を行う。
-              svg.select(dom1 + " .axis.right").call(n_AxisRight); 
-              //描写エリア 左軸の描写を行う。
-              svg.select(dom1 + " .axis.left").call(n_AxisLeft); 
-              //yデータをプロットするy座標に変換する関数
-              var y2 = d3.scaleLinear().domain([min_val, max_val]).range([yaxis_min, yaxis_max]);
-              var delta0=barchart_property[0]
-              var delta1=barchart_property[1]
-              var dw=barchart_property[2]            
-            //棒グラフ作成のためのデータを生成する関数。
-              var datagenarate_bar=function(dats,delta0,delta1,dw,period){
-              var bulk=[];
-              dats.forEach(function(dat,i){
-              var xp = function(i) { return delta0+i*(dw+delta1) }
-              var yp = function(d) { if (y2(d.val) <= y2(0)) return y2(d.val) ; else if(y2(d.val) > y2(0)) return y2(0) }     
-              bulk.push({
-                x:xp(i+period-1), 
-                y:yp(dat),
-                width:dw,
-                height:Math.abs(y2(dat.val)-y2(0))
-              })
-              })
-                  return bulk
-              }
-              //棒グラフ作成のためのデータを生成する。
-              var datagenarate_barchart0=datagenarate_bar(dats0,delta0,delta1,dw,period0)  //SMA 終値-始値 
-              var datagenarate_barchart1=datagenarate_bar(dats1,delta0,delta1,dw,period1+1) //SMA 終値(本日)-始値(昨日)
-            //棒グラフの表示 (SMA 終値-始値) 
-              indicatorSelection.append("g")
-                .selectAll("rect")
-                .data(datagenarate_barchart0)
-                .enter()
-                .append("rect")
-                .attr("x", function(d) { return d.x; })
-                .attr("y", function(d) { return d.y; })
-                .attr("width", function(d) { return d.width; })
-                .attr("height", function(d) { return d.height; })
-                .attr("fill", "gray")
-                .attr("fill-opacity", 0.1);
-            //棒グラフの表示 (SMA 終値(本日)-始値(昨日)) 
-              indicatorSelection.append("g")
-                .selectAll("rect")
-                .data(datagenarate_barchart1)
-                .enter()
-                .append("rect")
-                .attr("x", function(d) { return d.x; })
-                .attr("y", function(d) { return d.y; })
-                .attr("width", function(d) { return d.width; })
-                .attr("height", function(d) { return d.height; })
-                .attr("fill", "green")
-                .attr("fill-opacity", 0.1);
-            // y軸(左側)にタイトルを表示する
-              svg.select(dom1+" .indicator-plot").append("g")
-                    .append("text")
-                    .attr("class", "symbol")
-                    .style("font-size", 8)
-                    .attr("x", x0)            
-                    .attr("y", y2(max_val))
-                    .text(title);
-            var legendVals = ["終値-初値のSMA", "終値(前日)-終値(当日)のSMA"]
-            var iro=['gray','green']
-            var svgdom="g.third_area"
-            this.hanrei_writer_second(legendVals,iro,svgdom)
-              svg.select(dom1+" .indicator-plot").append("g")
-                  // .attr("transform", "translate(" + x1 + ",0)")
-                    .append("text")
-                    .attr("class", "symbol")
-                    .attr("x", x0)            
-                    .attr("y", y2(max_val))
-                    .text(title);
-          }
+          //   //*** 描写エリア左軸の設定をしている。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "axis left")
+          //           .attr("transform", "translate(" + x0 + ",0)")   //x(0) ->x0
+          //   //*** 描写エリアのデータを表示する場所を設定している。*******
+          //   indicatorSelection.append("g")
+          //           .attr("class", "indicator-plot")
+          //           .attr("transform", "translate(0,0)");
+          //   //yaxis_min=indicatorTop(0)+dim.indicator.height,    yaxis_max=indicatorTop(0)
+          //     //軸位置の設定,軸の数値範囲の設定を行うヘルパー関数を定義している    //indicatorTop(0)=dim.indicator.top , 
+          //     var n_axisScale = d3.scaleLinear().domain([min_val,max_val]).range([yaxis_min, yaxis_max]);
+          //     //描写エリア 右軸の描写設定をしている。
+          //     var n_AxisRight = d3.axisRight(n_axisScale).ticks(5);
+          //     //描写エリア 左軸の描写設定をしている。
+          //     var n_AxisLeft = d3.axisLeft(n_axisScale).ticks(5);
+          //     //描写エリア 右軸の描写を行う。
+          //     svg.select(dom1 + " .axis.right").call(n_AxisRight); 
+          //     //描写エリア 左軸の描写を行う。
+          //     svg.select(dom1 + " .axis.left").call(n_AxisLeft); 
+          //     //yデータをプロットするy座標に変換する関数
+          //     var y2 = d3.scaleLinear().domain([min_val, max_val]).range([yaxis_min, yaxis_max]);
+          //     var delta0=barchart_property[0]
+          //     var delta1=barchart_property[1]
+          //     var dw=barchart_property[2]            
+          //   //棒グラフ作成のためのデータを生成する関数。
+          //     var datagenarate_bar=function(dats,delta0,delta1,dw,period){
+          //     var bulk=[];
+          //     dats.forEach(function(dat,i){
+          //     var xp = function(i) { return delta0+i*(dw+delta1) }
+          //     var yp = function(d) { if (y2(d.val) <= y2(0)) return y2(d.val) ; else if(y2(d.val) > y2(0)) return y2(0) }     
+          //     bulk.push({
+          //       x:xp(i+period-1), 
+          //       y:yp(dat),
+          //       width:dw,
+          //       height:Math.abs(y2(dat.val)-y2(0))
+          //     })
+          //     })
+          //         return bulk
+          //     }
+          //     //棒グラフ作成のためのデータを生成する。
+          //     var datagenarate_barchart0=datagenarate_bar(dats0,delta0,delta1,dw,period0)  //SMA 終値-始値 
+          //     var datagenarate_barchart1=datagenarate_bar(dats1,delta0,delta1,dw,period1+1) //SMA 終値(本日)-始値(昨日)
+          //   //棒グラフの表示 (SMA 終値-始値) 
+          //     indicatorSelection.append("g")
+          //       .selectAll("rect")
+          //       .data(datagenarate_barchart0)
+          //       .enter()
+          //       .append("rect")
+          //       .attr("x", function(d) { return d.x; })
+          //       .attr("y", function(d) { return d.y; })
+          //       .attr("width", function(d) { return d.width; })
+          //       .attr("height", function(d) { return d.height; })
+          //       .attr("fill", "gray")
+          //       .attr("fill-opacity", 0.1);
+          //   //棒グラフの表示 (SMA 終値(本日)-始値(昨日)) 
+          //     indicatorSelection.append("g")
+          //       .selectAll("rect")
+          //       .data(datagenarate_barchart1)
+          //       .enter()
+          //       .append("rect")
+          //       .attr("x", function(d) { return d.x; })
+          //       .attr("y", function(d) { return d.y; })
+          //       .attr("width", function(d) { return d.width; })
+          //       .attr("height", function(d) { return d.height; })
+          //       .attr("fill", "green")
+          //       .attr("fill-opacity", 0.1);
+          //   // y軸(左側)にタイトルを表示する
+          //     svg.select(dom1+" .indicator-plot").append("g")
+          //           .append("text")
+          //           .attr("class", "symbol")
+          //           .style("font-size", 8)
+          //           .attr("x", x0)            
+          //           .attr("y", y2(max_val))
+          //           .text(title);
+          //   var legendVals = ["終値-初値のSMA", "終値(前日)-終値(当日)のSMA"]
+          //   var iro=['gray','green']
+          //   var svgdom="g.third_area"
+          //   this.hanrei_writer_second(legendVals,iro,svgdom)
+          //     svg.select(dom1+" .indicator-plot").append("g")
+          //         // .attr("transform", "translate(" + x1 + ",0)")
+          //           .append("text")
+          //           .attr("class", "symbol")
+          //           .attr("x", x0)            
+          //           .attr("y", y2(max_val))
+          //           .text(title);
+          // }
           //第1領域に凡例を配置する
           hanrei_writer_first(legendVals,iro,svgdom){
             var legend = svg.selectAll('ohlc222').append("g")　// 凡例の領域作成    
@@ -1274,34 +1275,34 @@ export default {
                 return eq_n
           }
           //(4-2-4)ろうそく足にカーソルを重ねたときに、日にちと終値を表示させる。
-          var dataput=function(data){        
-          var positionLabel = svg.append("text")
-          .attr("id",1)
-          .attr("x",10)
-          .attr("y",10) // positionLabelオブジェクト  <text x=posX, y=posY, id=1>(日にち,終値)</text>を生成する。
-          .attr("font-weight","bold");
-          var pos=svg.on("mousemove", function(){
-                        var posX=d3.mouse(this)[0]
-                        var posY=d3.mouse(this)[1]
-                        var datlength=data.length
-                        var val =display_dayclose(datlength)
-                        var delta0=val[0]
-                        var delta1=val[1]
-                        var dw=val[2]
-                        var nmax=val[3]
-                        var num = sol_get(posX,delta0,delta1,dw,data.length)
-                        //console.log("num")
-                        //console.log(num)
-                        positionLabel  
-                        .attr("x",posX-100)
-                        .attr("y",posY-10)
-                        //console.log(timeForm(data[num-1].date))
-                        //console.log(data[num-1].close)
-                        positionLabel.text([timeForm(data[num-1].date),  "close:" + data[num-1].close])
-                        //positionLabel.text(d3.mouse(this)); //座標を表示する。(for debug)
+        //   var dataput=function(data){        
+        //   var positionLabel = svg.append("text")
+        //   .attr("id",1)
+        //   .attr("x",10)
+        //   .attr("y",10) // positionLabelオブジェクト  <text x=posX, y=posY, id=1>(日にち,終値)</text>を生成する。
+        //   .attr("font-weight","bold");
+        //   var pos=svg.on("mousemove", function(){
+        //                 var posX=d3.mouse(this)[0]
+        //                 var posY=d3.mouse(this)[1]
+        //                 var datlength=data.length
+        //                 var val =display_dayclose(datlength)
+        //                 var delta0=val[0]
+        //                 var delta1=val[1]
+        //                 var dw=val[2]
+        //                 var nmax=val[3]
+        //                 var num = sol_get(posX,delta0,delta1,dw,data.length)
+        //                 //console.log("num")
+        //                 //console.log(num)
+        //                 positionLabel  
+        //                 .attr("x",posX-100)
+        //                 .attr("y",posY-10)
+        //                 //console.log(timeForm(data[num-1].date))
+        //                 //console.log(data[num-1].close)
+        //                 positionLabel.text([timeForm(data[num-1].date),  "close:" + data[num-1].close])
+        //                 //positionLabel.text(d3.mouse(this)); //座標を表示する。(for debug)
                         
-                });
-        }
+        //         });
+        // }
 
 
          //(4-2-5)トレンドラインを作成するコード
